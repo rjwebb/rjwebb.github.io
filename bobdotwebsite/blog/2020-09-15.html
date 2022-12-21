@@ -1,0 +1,58 @@
+<!DOCTYPE html><html ><head ><title >2020-09-15 | bob.website</title><meta name="viewport" content="height=device-height, initial-scale=1.0"/><style >
+body {
+background-color:#fff6c4;
+color:#001402;
+max-width:50em;
+}
+a {
+font-style: italic;
+}
+a:hover {
+color: #eb4034;
+}
+a {
+color: #420400;
+}
+</style></head><body ><main ><h1 >2020-09-15</h1><a id="01-fill-factor"></a><h2 >fill factor</h2><p ><p>
+  I learned the other day that indexes in PostgreSQL do not point to individual rows, but to <a href="https://www.postgresql.org/docs/8.0/storage-page-layout.html">pages</a>. These are fixed-size (usually 8Kb) spaces of memory.
+</p>
+<p>
+  Another thing that I learned was that when performing updates, what PostgreSQL really does is copy the data and then mark the out of date copy of the row as "dead". These dead copies are then cleaned up in an operation called 'vacuuming', which can be scheduled to run periodically or in parallel with the normal operation of the database.
+</p>
+<p>
+  This means that when you update some data in a row that has indexes pointing to some of its fields, you might end up copying that row to another page, which means you also have to update its indexes. Updating indexes gets more and more expensive as the database gets larger.
+</p>
+<p>
+  Fortunately, we can reduce the number of index updates by using a setting called "fill factor". This value determines how much space is left 'free' in each page when new rows are inserted. When a row is updated, its new copy is then inserted into the space 'next to' the old copy, which means that the index does not need to be updated.
+</p>
+<p>
+  How do you determine the right fill factor? As far as I know, this is a function of 1. how often vacuuming occurs 2. how often rows in the table are typically updated. Something that makes this tricky to determine by experimentation in production is that changing the fill factor essentially requires you to completely recreate the contents of the table. However, if you are able to model typical usage patterns then you could run a number of simulations to find an ideal value.
+</p>
+<p>
+  All of this is not particularly interesting unless it is directly useful to you, but I think it illustrates some general properties of software engineering that are important:
+  <ul>
+    <li>
+      Knowing how your application will be used 'in the wild' has a direct impact on the design decisions you should take. It is not enough to just think about how concepts or systems are logically related to each other. In order to make something that will run efficiently, you should also consider the patterns or rhythm of usage.
+    </li>
+    <li>
+      It is worth learning about how the tools you use work at a deeper level. I have used PostgreSQL for several years but I never really looked into how it worked below the surface. I occasionally glimpsed at it by trying to interpret EXPLAIN ANALYZE queries, but in order to interpret them I had to basically take what other people said about "Seq Scan" and "Nested Loop" on faith. I still don't know that much about how this stuff works, but the idea that I <i>could</i> know about it feels really powerful.
+    </li>
+  </ul>
+</p>
+</p><a id="02-writing-your-own-html"></a><h2 >writing your own html</h2><p ><p>
+  If this website looks archaic or slightly ugly, there is a good reason! It is made up of 100% hand-made home-grown HTML. I have some reasons for doing it this way:
+  <ul>
+    <li>
+      Work-life separation. Like a lot of professional software engineers, computing is also my hobby. When I write HTML, I don't have to think about a lot of the things that I think about when I am doing my day job.
+    </li>
+    <li>
+      Lower stress levels. Compared to working with that produces content for the web (be that a <a href="https://jekyllrb.com/">static site generator</a> or <a href="https://reactjs.org/">single page web app framework</a>), pure HTML does not do anything <a href="https://www.youtube.com/watch?v=u5CVsCnxyXg">surprising</a>. This is great, because surprises force me out of the mode of creating/imagining and into the mode of investigating/diagnosing bugs and eccentric behaviour. While I enjoy working in both modes, having to flip between them is kind of stressful.
+    </li>
+    <li>
+      Longevity. The "<a href="https://en.wikipedia.org/wiki/Lindy_effect">Lindy Effect</a>" states that in the absence of any other evidence, the expected lifespan of a non-perishable thing (such as a web technology) is proportional to its current age. If I want to make something that lasts a long time, I should use the part of the Web that has lasted the longest - HTML.
+    </li>
+    <li>
+      <a href="https://html.energy/">html energy</a>
+  </ul>
+</p>	
+</p><a href="../index.html">[back]</a></main><footer >copyright me, 2021</footer></body></html>
