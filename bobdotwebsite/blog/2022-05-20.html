@@ -1,77 +1,92 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>2022-05-20 | bob.website</title>
+    <meta name="viewport" content="height=device-height, initial-scale=1.0" />
+    <style>
+      body {
+        background-color: #fff6c4;
+        color: #001402;
+        max-width: 50em;
+      }
 
-<head>
-  <title>2022-05-20 | bob.website</title>
-  <meta name="viewport" content="height=device-height, initial-scale=1.0" />
-  <style>
-    body {
-      background-color: #fff6c4;
-      color: #001402;
-      max-width: 50em;
-    }
+      a {
+        font-style: italic;
+      }
 
-    a {
-      font-style: italic;
-    }
+      a:hover {
+        color: #eb4034;
+      }
 
-    a:hover {
-      color: #eb4034;
-    }
+      a {
+        color: #420400;
+      }
+    </style>
+  </head>
 
-    a {
-      color: #420400;
-    }
-  </style>
-</head>
-
-<body>
-  <main>
-    <h1>2022-05-20</h1>
-    <a id="01-basic-esbuild-react"></a>
-    <h2>basic esbuild react</h2>
-    <p>
-      A while back I found out about <a href="https://esbuild.github.io/">esbuild</a>, an "extremely fast JavaScript
-      bundler". The developers aren't kidding - it can take ~10-100x less time than webpack to make a production or
-      development bundle of a JavaScript project. I want to make a simple React project that makes use of esbuild as
-      an experiment.
-    </p>
-    <p>
-      Developers usually start React web apps using Create React App, a template that contains React, Webpack, some
-      polyfills for browser compatibility and some helper scripts. This is useful if you want to get something running
-      quickly, but you are standing on the shoulders of giants. What I really want is start out with a minimal "core"
-      application that I can understand and then gradually add new things to, such that I end up understanding how
-      <em>everything</em> fits together. In other words, I want to play the game of "software development" on
-      <a href="https://thezvi.wordpress.com/2017/08/26/play-in-hard-mode/">hard mode</a>.
-    </p>
-    <p>
-      At its core, esbuild and webpack are compilers, but instead of compiling from a high-level language (e.g. C) to
-      a low level language (e.g. machine code) it compiles from a high-level language (e.g. JavaScript with
-      module imports, TypeScript, JSX) to another high-level language (JavaScript with no module imports). This can be
-      done with the following command, which basically takes an input file "src/main.tsx" (I'm using
-      <a href="https://en.wikipedia.org/wiki/TypeScript">TypeScript</a> with
-      <a href="https://reactjs.org/docs/introducing-jsx.html">JSX</a>), combines that file with all of the other
-      modules it imports, does some extra magic (e.g. minification, source maps) and puts it all into a single
-      JavaScript file "public/main.js" that can be run by the browser. The names of the input and output files are
-      totally arbitrary, you can call them whatever you want.
+  <body>
+    <main>
+      <h1>2022-05-20</h1>
+      <a id="01-basic-esbuild-react"></a>
+      <h2>basic esbuild react</h2>
+      <p>
+        A while back I found out about
+        <a href="https://esbuild.github.io/">esbuild</a>, an "extremely fast
+        JavaScript bundler". The developers aren't kidding - it can take
+        ~10-100x less time than webpack to make a production or development
+        bundle of a JavaScript project. I want to make a simple React project
+        that makes use of esbuild as an experiment.
+      </p>
+      <p>
+        Developers usually start React web apps using Create React App, a
+        template that contains React, Webpack, some polyfills for browser
+        compatibility and some helper scripts. This is useful if you want to get
+        something running quickly, but you are standing on the shoulders of
+        giants. What I really want is start out with a minimal "core"
+        application that I can understand and then gradually add new things to,
+        such that I end up understanding how
+        <em>everything</em> fits together. In other words, I want to play the
+        game of "software development" on
+        <a href="https://thezvi.wordpress.com/2017/08/26/play-in-hard-mode/"
+          >hard mode</a
+        >.
+      </p>
+      <p>
+        At its core, esbuild and webpack are compilers, but instead of compiling
+        from a high-level language (e.g. C) to a low level language (e.g.
+        machine code) it compiles from a high-level language (e.g. JavaScript
+        with module imports, TypeScript, JSX) to another high-level language
+        (JavaScript with no module imports). This can be done with the following
+        command, which basically takes an input file "src/main.tsx" (I'm using
+        <a href="https://en.wikipedia.org/wiki/TypeScript">TypeScript</a> with
+        <a href="https://reactjs.org/docs/introducing-jsx.html">JSX</a>),
+        combines that file with all of the other modules it imports, does some
+        extra magic (e.g. minification, source maps) and puts it all into a
+        single JavaScript file "public/main.js" that can be run by the browser.
+        The names of the input and output files are totally arbitrary, you can
+        call them whatever you want.
+      </p>
       <pre>esbuild --bundle src/main.tsx --outfile=public/main.js</pre>
-    </p>
-    <p>
-      If you want to save yourself from having to type out the esbuild command all the time, you could put it in the
-      "scripts" section of your project's package.json file, but you don't have to. It could just as well be
-      part of a shell script or a CI task or copied and pasted into your temrinal every time.
-    </p>
-    <p>
-      To use the built file in a web app, you should make sure that the HTML file that will make use of the JS has a
-      script tag in it that references the built file.
-    </p>
-    <p>
-      I created a repository with an <a href="https://github.com/rjwebb/basic-esbuild-react">empty app</a> that uses
-      the above approach. It's missing a lot of features, but that's kind of the point.
-    </p>
-    </p><a href="../index.html">[back]</a>
-  </main>
-  <footer>copyright me, 2022</footer>
-</body>
-
+      <p>
+        If you want to save yourself from having to type out the esbuild command
+        all the time, you could put it in the "scripts" section of your
+        project's package.json file, but you don't have to. It could just as
+        well be part of a shell script or a CI task or copied and pasted into
+        your temrinal every time.
+      </p>
+      <p>
+        To use the built file in a web app, you should make sure that the HTML
+        file that will make use of the JS has a script tag in it that references
+        the built file.
+      </p>
+      <p>
+        I created a repository with an
+        <a href="https://github.com/rjwebb/basic-esbuild-react">empty app</a>
+        that uses the above approach. It's missing a lot of features, but that's
+        kind of the point.
+      </p>
+      <a href="../index.html">[back]</a>
+    </main>
+    <footer>copyright me, 2022</footer>
+  </body>
 </html>
