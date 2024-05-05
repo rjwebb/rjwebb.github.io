@@ -1,5 +1,4 @@
-body{
-  font-family: 'Arimo', sans-serif;
-  font-size: 26px;
-  padding: 20px;
+body {
+  max-width: 768px;
+  font-family: "Helvetica", sans-serif;
 }
