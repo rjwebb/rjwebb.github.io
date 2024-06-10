@@ -1,0 +1,36 @@
+<html>
+
+<head>
+  <title>Adder</title>
+
+  <script>
+    let input1Value = null;
+    let input2Value = null;
+
+    const applyUpdate = () => {
+      document.getElementById("result").textContent = (input1Value !== null && input2Value !== null) ? input1Value + input2Value : "...";
+    }
+
+    const input1OnInput = (value) => {
+      const parsedValue = parseFloat(value);
+      input1Value = parsedValue !== NaN ? parsedValue : null
+    };
+
+    const input2OnInput = (value) => {
+      const parsedValue = parseFloat(value);
+      input2Value = parsedValue !== NaN ? parsedValue : null
+    };
+  </script>
+
+</head>
+
+
+<body onload="applyUpdate()">
+  <input id="input_1" type="text" oninput="input1OnInput(this.value);applyUpdate()" />
+  +
+  <input id="input_2" type="text" oninput="input2OnInput(this.value);applyUpdate()" />
+  =
+  <span id="result"></span>
+</body>
+
+</html>
