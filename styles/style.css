@@ -1,4 +1,7 @@
 body {
   max-width: 768px;
-  font-family: "Helvetica", sans-serif;
+  font-family: "Arial", sans-serif;
+  margin: auto;
+  padding: 20px;
+  background-color: #fff4e3;
 }
