@@ -1,0 +1,132 @@
+<html>
+
+<head>
+  <title>12th October 2024 | rjwebb.github.io</title>
+  <link rel="stylesheet" type="text/css" href="../styles/style.css" />
+</head>
+
+<body>
+  <a href="../index.html">Back</a>
+  <h1>12th October 2024</h1>
+
+  <p>
+    Today I'm at the library. It's a Saturday so I'm not working, but I am in the mood for some quiet focused activity.
+  </p>
+
+
+  <p>
+    I watched Lu Wilson's talk "<a href="https://www.youtube.com/watch?v=MJzV0CX0q8o">What it means to be open</a>".
+    They are SO RIGHT about the benefits of working in public and sharing <a
+      href="https://www.todepond.com/sky/normalise-dont-share-lol/">scrappy fiddles</a>. I want to do this!
+
+  </p>
+  <p>
+    There are so many things that I think about and create and never share because I do not consider those thoughts or
+    creations to be ready for the outside world. I don't consider myself an artist but I do feel a deep need to connect
+    to others and find common areas of interest. Sometimes I've found that I've shared something scrappy then someone I
+    sort of vaguely know has stumbled across it, found that something in it resonates with them, then that forms the
+    basis for a really satisfying conversation, or deeper friendship, or basically any good thing ever.
+  </p>
+
+  <h2>long books</h2>
+
+  <p>
+    I'm currently reading Infinite Jest and I wondered, how long would it take for me to finish this book?
+    I imagined an app that could track when I finish a page and then take the current timestamp, then calculate the
+    average time it takes for me to read a page
+    and extrapolate from that to see how long I would take. At that point I realised that it would be much simpler to
+    just time myself reading a few pages and then calculate the answer by hand. So I read six pages and my girlfriend
+    pressed the "lap" button on the timer on her phone to take some samples.
+  </p>
+
+  <p>
+    Right now I'm on page 420 and ignoring endnotes, the book is about 970 pages long. We calculated that it takes me
+    one minute 10 seconds (or 70 seconds) on average to read a page (although I bet this varies hugely with energy
+    level). Given that there are 550 pages left, that's 550 * 70 = 38500 seconds or 641 minutes or ~10 hours 41 minutes.
+    I had been spending months reading this book in an extremely on-and-off way, a few minutes here and there with huge
+    gaps. But calculating this made me realise that I could finish it, if I could just dedicate a few large blocks of
+    time or one long-haul flight.
+  </p>
+
+  <p>
+    I had a few ideas for the app:
+  </p>
+
+  <ul>
+    <li>
+      A simple app that lets you enter in the current page and the total number of pages. It then gives you a huge
+      button to press whenever you advance a page, which then logs the current time. It could then also display a
+      prediction of when you would finish the book that it extrapolates from the timestamps. It could have another
+      button to indicate when you "pause" reading the book.
+    </li>
+    <li>
+      An app that functions as an ebook reader, so that reading and tracking time are integrated into the same
+      application. Turning the page within the app would log a timestamp. Depending on the file format of the book,
+      there could be different ways to implement this:
+      <ul>
+        <li>The app could take raw text files (e.g. from Gutenberg) as input and using the word position to measure how
+          far along the book the reader is.</li>
+        <li>Or the app could take pdf files and track the reader's progress by page.</li>
+        <li>Or the app could take .epub files as input and choose between tracking by word or page, depending on what
+          metadata is available (page markers?) in the epub file.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h3>
+    .epub files
+  </h3>
+
+  <p>
+    That got me thinking about .epub files. I knew that 1. most epub reader apps are terrible 2. epub files are
+    basically zip files that contain websites but basically nothing else about them. I could look up information about
+    them but I figured taking a look at them directly would be more fun.
+  </p>
+
+  <p>
+    I started off with some ebooks I had lying around in my documents folder. For each one, I changed the file extension
+    from ".epub" to ".zip", then unzipped them. I wrote a simple Python script to do this:
+  </p>
+
+  <pre>
+    import os
+    import shutil
+    import zipfile
+
+    for epub_filename in os.listdir("epubs"):
+      # needed so that we can figure files like .DS_Store
+      if not epub_filename.endswith(".epub"):
+        continue
+
+      book_name = epub_filename.split(".epub")[0]
+      f_in_name= f"epubs/{epub_filename}"
+      f_out_name = f"zips/{book_name}.zip"
+
+      shutil.copyfile(f_in_name, f_out_name)
+
+      with zipfile.ZipFile(f_out_name, 'r') as zip_ref:
+        zip_ref.extractall(f"extracted/{book_name}")
+  </pre>
+
+  <p>
+    Then I just looked through the unzipped folders by hand. Some observations:
+  </p>
+
+  <ul>
+    <li>there is always a file called "mimetype" with the contents "application/epub+zip".</li>
+    <li>there is always a folder called "META_INF", which has a file called "container.xml".</li>
+    <li>"container.xml" is an xml file which contains a "rootfile" tag with a reference to a file path which is usually
+      "content.opf" or "OEBPS/content.opf" which has a mime type "application/oebps-package+xml".</li>
+    <li> it seems like "content.opf" has the important ebook-specific metadata, like the title, authors names, chapter
+      names, links to chapter files, etc. it also has a link to the table of contents, which is usually called
+      "toc.ncx". "content.opf" is the "entry point" to all of the other parts of the file
+    </li>
+    <li>the META_INF folder may also container a "calibre_bookmarks.txt" file - i think this is actually created by the
+      calibre ebook reader when you make a bookmark</li>
+  </ul>
+
+  <p>That's all I found out so far, next I want to look deeper into "content.opf" and the chapter files themselves.</p>
+
+</body>
+
+</html>
