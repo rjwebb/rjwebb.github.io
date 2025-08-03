@@ -1,0 +1,61 @@
+body {
+  background-color: lightpink;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 72px;
+  text-decoration: wavy;
+}
+
+ul {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-left: 0;
+}
+
+ul {
+  /* border-style: solid; */
+  padding: 1px;
+  padding-top: 5px;
+  /* border-radius: 5px; */
+  /* border-color: pink; */
+}
+
+li {
+  list-style: none;
+  border-style: solid;
+  padding: 10px;
+  border-radius: 5px;
+  border-color: white;
+}
+
+li {
+  background-color: aqua;
+}
+
+li li {
+  background-color: yellow;
+}
+
+li li li {
+  background-color: greenyellow;
+}
+
+li li li li {
+  background-color: springgreen;
+}
+
+li > a {
+  color: black;
+}
+
+summary {
+  cursor: pointer;
+}
+
+summary:hover {
+  text-decoration: underline dashed;
+}
