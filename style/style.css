@@ -31,6 +31,12 @@ body {
   gap: 1em;
 }
 
+.icon-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
 #html-day-banner {
   border: 0.2em solid lime;
   background-color: white;
