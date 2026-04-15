@@ -4,107 +4,100 @@
     <title>Home | rjwebb.github.io</title>
     <link rel="stylesheet" type="text/css" href="style/style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <script>
+        const img = new Image();
+        img.src = 'style/background_1pc.jpg';
+        img.onload = () => document.querySelector('.bg-mask').classList.add('loaded');
+    </script>
 </head>
 
 <body>
-    <h1>Hi, I'm Bob</h1>
+    <div class="bg-mask"></div>
+    <div id="content">
+        <h1>Hi, I'm Bob</h1>
 
-    <div id="html-day-banner">On 2nd August 2025, I participated in <strong><a
-                href="https://html.energy/html-day/2025/index.html">HTML day</a></strong> - a worldwide celebration of
-        the expressive and liberatory power of writing HTML. <strong><a href="./html_day_2025/">You can visit the
-                website I created here</a></strong>.
+        <div id="html-day-banner">On 2nd August 2025, I participated in <strong><a
+                    href="https://html.energy/html-day/2025/index.html">HTML day</a></strong> - a worldwide celebration
+            of
+            the expressive and liberatory power of writing HTML. <strong><a href="./html_day_2025/">You can visit the
+                    website I created here</a></strong>.
+        </div>
+
+
+        <p>
+            I currently work at
+            <a href="https://canvas.xyz/">canvas.xyz</a>, a startup
+            that is creating tools and libraries for peer-to-peer
+            web development. This largely involves writing
+            interactive web applications using the
+            <a href="https://martinfowler.com/eaaDev/EventSourcing.html">event sourcing pattern</a>
+            and then
+            <a
+                href="https://joelgustafson.com/posts/2023-05-04/merklizing-the-key-value-store-for-fun-and-profit">efficiently</a>
+            replicating the set of events across peers using
+            libraries like <a href="https://libp2p.io/">libp2p</a>.
+        </p>
+
+
+
+        <h2>Functional programming</h2>
+        <ul>
+            <li>
+                I've had phases of writing Haskell for fun. I visited
+                Zurihac in
+                <a href="https://zfoh.ch/zurihac2023/">2023</a>.
+            </li>
+            <li>
+                A
+                <a href="https://github.com/static-clouds/sudoku-sat">sudoku solver (2019)</a>
+                that uses SAT as an intermediate problem representation
+                and the Davis-Putnam-Logemann-Loveland algorithm to
+                solve it.
+            </li>
+        </ul>
+        </li>
+
+
+
+
+        My <a href="https://github.com/rjwebb">GitHub</a> profile.<br />
+
+        <hr />
+
+        <h3>Various works (incomplete):</h3>
+        <ul>
+            <li>
+                <a href="./issues">A collection of GitHub issues that are suitable for
+                    beginners</a>
+            </li>
+            <li>
+                <s>A web application I made, that displays live information
+                    about TfL bike hire.</s>
+                REST IN PEACE - this was on Heroku, which cut the free tier in
+                2022.
+            </li>
+        </ul>
+
+        <hr />
+        <h3>Diary</h3>
+
+        <ul>
+            <li><a href="posts/2025-02-07.html">2nd February, 2025</a></li>
+            <li><a href="posts/2025-01-08.html">8th January, 2025</a></li>
+            <li><a href="posts/2024-12-28.html">28th December, 2024</a></li>
+            <li><a href="posts/2024-12-16.html">16th December, 2024</a></li>
+            <li><a href="posts/2024-10-21.html">21st October, 2024</a></li>
+            <li><a href="posts/2024-10-12.html">12th October, 2024</a></li>
+        </ul>
+
+        <hr />
+
+        I used to have another homepage at <strong>bob.website</strong>. The
+        preserved site can be found
+        <a href="./bobdotwebsite/index.html">here</a>.
+
     </div>
-
-    <ul>
-        <li>
-            Web development<br />
-            <ul>
-                <li>
-                    I currently work at
-                    <a href="https://canvas.xyz/">canvas.xyz</a>, a startup
-                    that is creating tools and libraries for peer-to-peer
-                    web development. This largely involves writing
-                    interactive web applications using the
-                    <a href="https://martinfowler.com/eaaDev/EventSourcing.html">event sourcing pattern</a>
-                    and then
-                    <a
-                        href="https://joelgustafson.com/posts/2023-05-04/merklizing-the-key-value-store-for-fun-and-profit">efficiently</a>
-                    replicating the set of events across peers using
-                    libraries like <a href="https://libp2p.io/">libp2p</a>.
-                </li>
-                <li>TBA - more experiments and thoughts here</li>
-            </ul>
-        </li>
-        <li>
-            Functional programming<br />
-            <ul>
-                <li>
-                    I've had phases of writing Haskell for fun. I visited
-                    Zurihac in
-                    <a href="https://zfoh.ch/zurihac2023/">2023</a>.
-                </li>
-                <li>
-                    A
-                    <a href="https://github.com/static-clouds/sudoku-sat">sudoku solver (2019)</a>
-                    that uses SAT as an intermediate problem representation
-                    and the Davis-Putnam-Logemann-Loveland algorithm to
-                    solve it.
-                </li>
-            </ul>
-        </li>
-        <li>
-            Bouldering<br />
-            <ul>
-                <li>
-                    Favourite gyms:
-                    <a href="https://www.blockfabrik.at/">Blockfabrik (Vienna)</a>,
-                    <a href="https://www.mileendwall.org.uk/">Mile End Climbing Wall (London)</a>
-                    and
-                    <a href="https://www.depotclimbing.co.uk/sheffield/">Depot (Sheffield)</a>.
-                </li>
-                <li>Current level: V2</li>
-                <li>I've never climbed outdoors - yet</li>
-            </ul>
-        </li>
-        <li>Cooking</li>
-        <li>Listening to music</li>
-    </ul>
-
-    My <a href="https://github.com/rjwebb">GitHub</a> profile.<br />
-
-    <hr />
-
-    <h3>Various works (incomplete):</h3>
-    <ul>
-        <li>
-            <a href="./issues">A collection of GitHub issues that are suitable for
-                beginners</a>
-        </li>
-        <li>
-            <s>A web application I made, that displays live information
-                about TfL bike hire.</s>
-            REST IN PEACE - this was on Heroku, which cut the free tier in
-            2022.
-        </li>
-    </ul>
-
-    <hr />
-    <h3>Diary</h3>
-
-    <ul>
-        <li><a href="posts/2025-02-07.html">2nd February, 2025</a></li>
-        <li><a href="posts/2025-01-08.html">8th January, 2025</a></li>
-        <li><a href="posts/2024-12-28.html">28th December, 2024</a></li>
-        <li><a href="posts/2024-12-16.html">16th December, 2024</a></li>
-        <li><a href="posts/2024-10-21.html">21st October, 2024</a></li>
-        <li><a href="posts/2024-10-12.html">12th October, 2024</a></li>
-    </ul>
-
-    <hr />
-
-    I used to have another homepage at <strong>bob.website</strong>. The
-    preserved site can be found
-    <a href="./bobdotwebsite/index.html">here</a>.
 </body>
 
 </html>

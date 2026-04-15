@@ -1,12 +1,41 @@
 body {
   max-width: 50em;
-  font-family: "Arial", sans-serif;
+  font-family: "Helvetica", sans-serif;
   margin: auto;
   padding-top: 1em;
   padding-bottom: 1em;
   padding-left: 0.5em;
   padding-right: 0.5em;
-  background-color: #fff4e3;
+  background-color: white;
+}
+
+.bg-mask {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: #cbdaf2; /* your colour */
+  mask-image: url("background_1pc.jpg");
+  mask-mode: luminance;
+  mask-size: cover;
+  mask-position: center;
+
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.bg-mask.loaded {
+  opacity: 1;
+}
+
+#content {
+  background-color: white;
+  max-width: 50em;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: 0.5em;
+  padding-bottom: 2em;
+  display: "flex";
+  gap: 1em;
 }
 
 #html-day-banner {
