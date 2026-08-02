@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>2026-08-02 | rjwebb.github.io</title>
+  <link rel="stylesheet" type="text/css" href="../style/style.css" />
+</head>
+
+<body>
+  <a href="../index.html">Back</a>
+  <h1>2026-08-02</h1>
+  <em>written 2nd August 2026</em>
+
+  <p>I’ve become obsessed over the weekend with <a
+  href="https://www.kodub.com/apps/polytrack">Polytrack</a>, a lo-fi
+  Trackmania clone. The game consists of time-trial tracks, the entire
+  point is to finish the track in the shortest possible time. The physics
+  are unlike any other racing game I’ve played - provided the car is
+  travelling fast enough, it can travel up walls and loop upside down for
+  as long as you want. You often have to quickly swap left and right in
+  your head to steer upside down. Everything comes down to split second
+  timing. The built in levels are really minimalistic, but the community
+  maps manage to make use of the track primitives to build beautiful lo-fi
+  gothic cathedrals, dungeons, open air landscapes, mountains, tunnels,
+  etc. This has become my new favourite thing to do while listening to
+  podcasts.</p>
+  <p>I’ve been working on improving my backup system. Previously, I had an
+  external hard drive that I would plug into my laptop, which I would load
+  data onto, then upload the data to an encrypted Hetzner storage box.
+  This was pretty cumbersome because I could only do backups while the
+  hard drive was plugged into my laptop. I was always worrying about
+  accidentally removing it and corrupting the data. So I set up a home
+  server (Beelink SER5), which will have its own external hard drive (at
+  least until I buy some big m.2 flash storage) and periodically sync with
+  Hetzner. I’ll move files from my laptop to the server via samba or sftp
+  over my local network. Unfortunately I still have more work to do. I
+  have a number of external hard drives, all containing backups from
+  various time periods, which have a lot of overlapping data, which all
+  need to be integrated into one folder schema. This will take a
+  while.</p>
+  <p>I keep thinking about <a
+  href="https://x.com/mitchellh/status/2057171518027887035?lang=en">this
+  tweet from May 20th 2026</a> by Mitchell Hashimoto:</p>
+  <blockquote>
+  <p>Fork your dependencies, trim them to only your use case, never update
+  unless it breaks for your users. I’ve been vocal about this for 10+
+  years. I’ve always said that updating is way riskier than latent bugs
+  (which can be tracked and CVEs monitored).</p>
+  </blockquote>
+  <blockquote>
+  <p>If you are updating a dependency, it’s on you to analyze every single
+  commit in the full transitive set of dependencies. If you dont see
+  anything compelling, dont update!</p>
+  </blockquote>
+  <blockquote>
+  <p>I remember at HashiCorp once in awhile an engineer would try to
+  update a dep or replace a DIY lib with an external one and id always ask
+  “show me the commit we need.” Dont update for the sake of it.</p>
+  </blockquote>
+  <blockquote>
+  <p>Feeling pretty swell about this mentality with all the supply chain
+  attacks happening.</p>
+  </blockquote>
+  <p>If you follow contemporary programming wisdom, then you might think
+  the best way to build something maintainable is to rely on imported
+  third-party code as much as possible. After all, if there is a bug or a
+  security issue, the third party maintainers can push a fix, then that
+  can be propagated (semi-automatically if you use something like
+  dependabot) to all of the dependent programs. Unfortunately, if any of
+  the dependencies are compromised or have a security hole that goes
+  unpatched, then your own code can now be compromised. Not to mention the
+  fact that finding exploits has never been easier. In some ways, software
+  development might have to happen more slowly, if it is to continue to be
+  viable.</p>
+</body>
+
+</html>
