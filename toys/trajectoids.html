@@ -1,0 +1,1193 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trajectoids</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=STIX+Two+Text:ital,wght@0,500;0,600;1,400&display=swap">
+<style>
+  :root{
+    --bg:#ECEFF1; --panel:#F5F7F8; --panel-2:#EDF0F2;
+    --ink:#1B2430; --ink-2:#55616E; --ink-3:#8B97A3;
+    --line:#D8DEE3; --line-2:#C9D0D6;
+    --accent:#2B62E3; --accent-soft:rgba(43,98,227,.14);
+    --amber:#B97818; --warn:#C24A2A;
+    --chip:#E6EAED; --chip-on:#1B2430; --chip-on-ink:#F5F7F8;
+    --v-bg:#E7EBED; --v-grid:#CBD3D9; --v-ribbon:#2B62E3; --v-ribbon-dim:#A9BEE8;
+    --v-trace:#C98A1F; --v-ghost:#2B62E3;
+    --glass:rgba(245,247,248,.82);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14181D; --panel:#1A2027; --panel-2:#161C22;
+      --ink:#E8ECF1; --ink-2:#9AA7B5; --ink-3:#647080;
+      --line:#242C35; --line-2:#2D3742;
+      --accent:#4C86FF; --accent-soft:rgba(76,134,255,.16);
+      --amber:#C67D1E; --warn:#E06A47;
+      --chip:#232B34; --chip-on:#E8ECF1; --chip-on-ink:#14181D;
+      --v-bg:#14181D; --v-grid:#232B33; --v-ribbon:#4C86FF; --v-ribbon-dim:#2E4470;
+      --v-trace:#E9A93E; --v-ghost:#4C86FF;
+      --glass:rgba(20,25,31,.78);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14181D; --panel:#1A2027; --panel-2:#161C22;
+    --ink:#E8ECF1; --ink-2:#9AA7B5; --ink-3:#647080;
+    --line:#242C35; --line-2:#2D3742;
+    --accent:#4C86FF; --accent-soft:rgba(76,134,255,.16);
+    --amber:#C67D1E; --warn:#E06A47;
+    --chip:#232B34; --chip-on:#E8ECF1; --chip-on-ink:#14181D;
+    --v-bg:#14181D; --v-grid:#232B33; --v-ribbon:#4C86FF; --v-ribbon-dim:#2E4470;
+    --v-trace:#E9A93E; --v-ghost:#4C86FF;
+    --glass:rgba(20,25,31,.78);
+  }
+  *{box-sizing:border-box; margin:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Archivo",system-ui,sans-serif; font-size:14px; line-height:1.45;
+    overflow:hidden;
+  }
+  #app{display:flex; height:100vh}
+  /* ---------- panel ---------- */
+  #panel{
+    width:330px; flex:none; background:var(--panel);
+    border-right:1px solid var(--line);
+    display:flex; flex-direction:column; overflow-y:auto;
+  }
+  #panel section{padding:16px 18px; border-bottom:1px solid var(--line)}
+  #panel header{padding:20px 18px 16px; border-bottom:1px solid var(--line)}
+  h1{
+    font-family:"STIX Two Text",Georgia,serif; font-weight:600; font-size:27px;
+    letter-spacing:.01em; text-wrap:balance;
+  }
+  h1 .dot{color:var(--accent)}
+  .dek{
+    font-family:"STIX Two Text",Georgia,serif; font-style:italic; font-weight:400;
+    color:var(--ink-2); font-size:14.5px; margin-top:6px; max-width:34ch;
+  }
+  h2{
+    font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--ink-3); margin-bottom:10px;
+  }
+  .hint{color:var(--ink-3); font-size:12px; margin-top:8px}
+  /* path editor */
+  #editor{
+    width:100%; height:150px; display:block; border-radius:6px;
+    background:var(--panel-2); border:1px solid var(--line);
+    cursor:crosshair; touch-action:none;
+  }
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px}
+  .chip{
+    font:inherit; font-size:12.5px; font-weight:500; color:var(--ink-2);
+    background:var(--chip); border:1px solid transparent; border-radius:99px;
+    padding:4px 12px; cursor:pointer;
+  }
+  .chip:hover{border-color:var(--line-2)}
+  .chip[aria-pressed="true"]{background:var(--chip-on); color:var(--chip-on-ink)}
+  .chip:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  /* scan chart */
+  #scanwrap{position:relative}
+  #scan{width:100%; height:110px; display:block}
+  #scantip{
+    position:absolute; pointer-events:none; display:none;
+    background:var(--glass); border:1px solid var(--line-2); border-radius:5px;
+    padding:3px 8px; font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-2);
+    white-space:nowrap; transform:translate(-50%,-130%); backdrop-filter:blur(4px);
+  }
+  .readout{display:grid; grid-template-columns:1fr auto; row-gap:5px; margin-top:12px}
+  .readout dt{color:var(--ink-2); font-size:12.5px}
+  .readout dd{
+    font-family:"IBM Plex Mono",monospace; font-size:12.5px; text-align:right;
+    font-variant-numeric:tabular-nums; color:var(--ink);
+  }
+  #status{font-size:12.5px; margin-top:10px; color:var(--ink-2)}
+  #status.warn{color:var(--warn); font-weight:500}
+  /* body controls */
+  .row{display:flex; align-items:center; gap:10px; margin-top:10px}
+  .row:first-of-type{margin-top:0}
+  .row label{flex:1; color:var(--ink-2); font-size:12.5px}
+  .row output{
+    font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink);
+    font-variant-numeric:tabular-nums; min-width:4ch; text-align:right;
+  }
+  input[type=range]{
+    -webkit-appearance:none; appearance:none; width:110px; height:3px; border-radius:2px;
+    background:var(--line-2); cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none; width:13px; height:13px; border-radius:50%;
+    background:var(--accent); border:none;
+  }
+  input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--accent);border:none}
+  .switch{display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--ink-2); font-size:12.5px; margin-top:9px}
+  .switch input{accent-color:var(--accent); width:14px; height:14px; cursor:pointer}
+  footer{
+    padding:14px 18px 18px; color:var(--ink-3); font-size:11.5px; margin-top:auto;
+  }
+  footer a{color:var(--ink-2)}
+  /* ---------- viewport ---------- */
+  #stage{flex:1; position:relative; min-width:0}
+  #gl{width:100%; height:100%; display:block; touch-action:none; cursor:grab}
+  #gl.dragging{cursor:grabbing}
+  #transport{
+    position:absolute; left:50%; bottom:18px; transform:translateX(-50%);
+    display:flex; align-items:center; gap:12px;
+    background:var(--glass); border:1px solid var(--line);
+    border-radius:99px; padding:8px 16px 8px 8px; backdrop-filter:blur(8px);
+  }
+  #play{
+    width:34px; height:34px; border-radius:50%; border:none; cursor:pointer;
+    background:var(--accent); color:#fff; display:grid; place-items:center; font-size:13px;
+    padding:0;
+  }
+  #play svg{display:block}
+  #transport label{font-size:11.5px; color:var(--ink-3); letter-spacing:.08em; text-transform:uppercase}
+  #speedout{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--ink-2); font-variant-numeric:tabular-nums}
+  @media (max-width:760px){
+    #app{flex-direction:column}
+    #panel{width:100%; max-height:52vh; border-right:none; border-bottom:1px solid var(--line)}
+    #stage{flex:1}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{scroll-behavior:auto}
+  }
+</style>
+
+<div id="app">
+  <div id="panel">
+    <header>
+      <h1>Trajectoids<span class="dot">.</span></h1>
+      <p class="dek">Draw a periodic path; the solver finds the sphere whose rolling
+      trace closes after two periods, then carves the solid that rolls your line.</p>
+    </header>
+
+    <section>
+      <h2>Path — one period</h2>
+      <canvas id="editor"></canvas>
+      <div class="chips" id="presets" role="group" aria-label="Path presets">
+        <button class="chip" data-preset="sine" aria-pressed="true">Sine</button>
+        <button class="chip" data-preset="zigzag" aria-pressed="false">Zigzag</button>
+        <button class="chip" data-preset="heartbeat" aria-pressed="false">Heartbeat</button>
+        <button class="chip" data-preset="meander" aria-pressed="false">Meander</button>
+      </div>
+      <p class="hint">Or draw your own, left to right. Ghosts show the neighbouring periods.</p>
+    </section>
+
+    <section>
+      <h2>Closure scan</h2>
+      <div class="row" style="margin-bottom:10px">
+        <label id="periods-label">Trace closes after</label>
+        <div class="chips" style="margin-top:0" id="periods" role="group" aria-labelledby="periods-label">
+          <button class="chip" data-n="2" aria-pressed="true">2</button>
+          <button class="chip" data-n="3" aria-pressed="false">3</button>
+          <button class="chip" data-n="4" aria-pressed="false">4</button>
+          <button class="chip" data-n="5" aria-pressed="false">5</button>
+        </div>
+      </div>
+      <div id="scanwrap">
+        <svg id="scan" role="img" aria-label="Closure error against turns per period"></svg>
+        <div id="scantip"></div>
+      </div>
+      <dl class="readout">
+        <dt>Rolling radius&ensp;<i>r</i></dt><dd id="ro-r">—</dd>
+        <dt>Turns per period</dt><dd id="ro-n">—</dd>
+        <dt>Closure error</dt><dd id="ro-dev">—</dd>
+      </dl>
+      <p id="status">Solving…</p>
+      <p class="hint">Closure error (log scale) across turns per period, for the chosen closure
+      period — longer periods wrap the trace more times before it bites its own tail. Each dot
+      is a radius where the trace closes; click one to carve that body instead.</p>
+    </section>
+
+    <section>
+      <h2>Body</h2>
+      <div class="row">
+        <label for="shell">Shell radius&ensp;R / r</label>
+        <input type="range" id="shell" min="1.05" max="1.6" step="0.01" value="1.25">
+        <output id="shellout" for="shell">1.25</output>
+      </div>
+      <label class="switch"><input type="checkbox" id="tg-trace" checked> Contact trace on the body</label>
+      <label class="switch"><input type="checkbox" id="tg-core"> Rolling core sphere</label>
+      <label class="switch"><input type="checkbox" id="tg-follow" checked> Camera follows the body</label>
+    </section>
+
+    <footer>
+      After Sobolev&nbsp;et&nbsp;al., <a href="https://www.nature.com/articles/s41586-023-06306-y"
+      target="_blank" rel="noopener">“Solid-body trajectoids shaped to roll along desired
+      pathways”</a>, <i>Nature</i> 620 (2023). Kinematic rolling — the body is carved from a
+      ball by planes tangent to its rolling core along the traced path.
+    </footer>
+  </div>
+
+  <div id="stage">
+    <canvas id="gl"></canvas>
+    <div id="transport">
+      <button id="play" aria-label="Play or pause rolling"></button>
+      <label for="speed">Speed</label>
+      <input type="range" id="speed" min="0.03" max="0.6" step="0.01" value="0.16">
+      <span id="speedout">0.16 T/s</span>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const TAU = Math.PI * 2;
+const $ = id => document.getElementById(id);
+
+/* ================= small linear algebra ================= */
+// quaternions as [w,x,y,z]
+function qmulL(c, ax, az, q){        // (c, ax, 0, az) ⊗ q, in place-ish
+  const [w,x,y,z] = q;
+  return [
+    c*w - ax*x - az*z,
+    c*x + ax*w - az*y,
+    c*y + az*x - ax*z,
+    c*z + az*w + ax*y
+  ];
+}
+function qnorm(q){
+  const m = Math.hypot(q[0],q[1],q[2],q[3]) || 1;
+  return [q[0]/m, q[1]/m, q[2]/m, q[3]/m];
+}
+// rotate v by conj(q): world → body
+function qrotInv(q, vx, vy, vz){
+  const [w,x,y,z] = q;
+  // conj = (w,-x,-y,-z); v' = q⁻¹ v q
+  const tx = 2*(-y*vz + z*vy), ty = 2*(-z*vx + x*vz), tz = 2*(-x*vy + y*vx);
+  return [
+    vx + w*tx + (-y*tz + z*ty),
+    vy + w*ty + (-z*tx + x*tz),
+    vz + w*tz + (-x*ty + y*tx)
+  ];
+}
+function quatToMat3(q){
+  const [w,x,y,z] = q;
+  return [
+    1-2*(y*y+z*z), 2*(x*y+w*z),   2*(x*z-w*y),
+    2*(x*y-w*z),   1-2*(x*x+z*z), 2*(y*z+w*x),
+    2*(x*z+w*y),   2*(y*z-w*x),   1-2*(x*x+y*y)
+  ]; // column-major columns of R
+}
+const M4 = () => new Float32Array(16);
+function mat4Identity(m){ m.fill(0); m[0]=m[5]=m[10]=m[15]=1; return m; }
+function mat4Mul(out, a, b){ // out = a·b
+  const o = new Float32Array(16);
+  for(let c=0;c<4;c++) for(let r=0;r<4;r++){
+    o[c*4+r] = a[r]*b[c*4] + a[4+r]*b[c*4+1] + a[8+r]*b[c*4+2] + a[12+r]*b[c*4+3];
+  }
+  out.set(o); return out;
+}
+function mat4Persp(out, fovy, aspect, near, far){
+  const f = 1/Math.tan(fovy/2);
+  out.fill(0);
+  out[0]=f/aspect; out[5]=f; out[10]=(far+near)/(near-far); out[11]=-1;
+  out[14]=2*far*near/(near-far);
+  return out;
+}
+function mat4LookAt(out, eye, at, up){
+  let zx=eye[0]-at[0], zy=eye[1]-at[1], zz=eye[2]-at[2];
+  let zl=Math.hypot(zx,zy,zz)||1; zx/=zl; zy/=zl; zz/=zl;
+  let xx=up[1]*zz-up[2]*zy, xy=up[2]*zx-up[0]*zz, xz=up[0]*zy-up[1]*zx;
+  let xl=Math.hypot(xx,xy,xz)||1; xx/=xl; xy/=xl; xz/=xl;
+  const yx=zy*xz-zz*xy, yy=zz*xx-zx*xz, yz=zx*xy-zy*xx;
+  out[0]=xx; out[1]=yx; out[2]=zx; out[3]=0;
+  out[4]=xy; out[5]=yy; out[6]=zy; out[7]=0;
+  out[8]=xz; out[9]=yz; out[10]=zz; out[11]=0;
+  out[12]=-(xx*eye[0]+xy*eye[1]+xz*eye[2]);
+  out[13]=-(yx*eye[0]+yy*eye[1]+yz*eye[2]);
+  out[14]=-(zx*eye[0]+zy*eye[1]+zz*eye[2]);
+  out[15]=1;
+  return out;
+}
+function mat4FromQuatPos(out, q, px, py, pz){
+  const R = quatToMat3(q);
+  out[0]=R[0]; out[1]=R[1]; out[2]=R[2]; out[3]=0;
+  out[4]=R[3]; out[5]=R[4]; out[6]=R[5]; out[7]=0;
+  out[8]=R[6]; out[9]=R[7]; out[10]=R[8]; out[11]=0;
+  out[12]=px; out[13]=py; out[14]=pz; out[15]=1;
+  return out;
+}
+
+/* ================= path model ================= */
+// a path is one period of y(x), x ∈ [0,1], as a polyline
+const PRESETS = {
+  sine:      x => 0.28*Math.sin(TAU*x),
+  zigzag:    x => { const t = (x%1+1)%1; return 0.30*(t<.25 ? 4*t : t<.75 ? 2-4*t : 4*t-4); },
+  heartbeat: x => 0.44*Math.exp(-(((x-0.46)/0.075)**2)) - 0.20*Math.exp(-(((x-0.63)/0.10)**2))
+                  + 0.05*Math.sin(TAU*x),
+  meander:   x => 0.27*Math.sin(TAU*x) + 0.14*Math.sin(2*TAU*x + 1.1),
+};
+function samplePreset(fn, N=240){
+  const pts = [];
+  for(let i=0;i<=N;i++){ const x=i/N; pts.push([x, fn(x)]); }
+  // force exact periodicity by removing the linear ramp
+  const y0=pts[0][1], y1=pts[N][1];
+  for(let i=0;i<=N;i++) pts[i][1] -= (y1-y0)*(i/N);
+  return pts;
+}
+// resample polyline to N equal-arc-length segments; returns {xs, ys, L, dirs}
+function resamplePath(pts, N){
+  const cum = [0];
+  for(let i=1;i<pts.length;i++){
+    cum.push(cum[i-1] + Math.hypot(pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]));
+  }
+  const L = cum[cum.length-1];
+  const xs = new Float64Array(N+1), ys = new Float64Array(N+1);
+  let j = 0;
+  for(let i=0;i<=N;i++){
+    const s = L*i/N;
+    while(j < cum.length-2 && cum[j+1] < s) j++;
+    const t = (s-cum[j]) / ((cum[j+1]-cum[j]) || 1);
+    xs[i] = pts[j][0] + t*(pts[j+1][0]-pts[j][0]);
+    ys[i] = pts[j][1] + t*(pts[j+1][1]-pts[j][1]);
+  }
+  const dirs = new Float64Array(2*N);
+  for(let i=0;i<N;i++){
+    let dx = xs[i+1]-xs[i], dy = ys[i+1]-ys[i];
+    const m = Math.hypot(dx,dy)||1;
+    dirs[2*i] = dx/m; dirs[2*i+1] = dy/m;
+  }
+  return {xs, ys, L, dirs, N};
+}
+
+/* ================= rolling solver ================= */
+// net rotation angle after rolling one period with radius r.
+// ground plane y=0; path (x, z=-y_path); step axis = ŷ×v̂ = (v_z, 0, -v_x)
+function netAngle(rp, r){
+  const {dirs, L, N} = rp;
+  const half = (L/N)/r/2;
+  const s = Math.sin(half), c = Math.cos(half);
+  let q = [1,0,0,0];
+  for(let i=0;i<N;i++){
+    const vx = dirs[2*i], vz = -dirs[2*i+1];
+    q = qmulL(c, s*vz, -s*vx, q);
+    if((i & 63) === 63) q = qnorm(q);
+  }
+  q = qnorm(q);
+  return 2*Math.acos(Math.min(1, Math.abs(q[0])));   // ∈ [0, π]
+}
+// closure after nP periods: Rⁿ = identity iff θ = 2πk/nP with gcd(k,nP)=1
+// (coprimality excludes solutions that already close in fewer periods).
+// deviation is nP·|θ − 2πk/nP| — the accumulated angle error after nP periods.
+const gcd = (a,b) => b ? gcd(b, a%b) : a;
+function closureTargets(nP){
+  const t = [];
+  for(let k=1; k<=nP/2; k++) if(gcd(k,nP) === 1) t.push(TAU*k/nP);
+  return t;
+}
+function deviation(rp, r, targets, nP){
+  const th = netAngle(rp, r);
+  let d = Infinity;
+  for(const a of targets) d = Math.min(d, Math.abs(th - a));
+  return d * nP;
+}
+function goldenMin(f, a, b, iters=52){
+  const g = (Math.sqrt(5)-1)/2;
+  let c = b - g*(b-a), d = a + g*(b-a), fc = f(c), fd = f(d);
+  for(let i=0;i<iters;i++){
+    if(fc < fd){ b=d; d=c; fd=fc; c=b-g*(b-a); fc=f(c); }
+    else       { a=c; c=d; fc=fd; d=a+g*(b-a); fd=f(d); }
+  }
+  return fc < fd ? [c,fc] : [d,fd];
+}
+// scan turns-per-period n = L/(2πr) and return {ns, devs, candidates:[{n,r,dev}]}
+function solveClosure(rp, nP){
+  const N_LO = 0.85, N_HI = 8, STEPS = 1400;
+  const targets = closureTargets(nP);
+  const ns = new Float64Array(STEPS+1), devs = new Float64Array(STEPS+1);
+  const devOfN = n => deviation(rp, rp.L/(TAU*n), targets, nP);
+  for(let i=0;i<=STEPS;i++){
+    ns[i] = N_LO + (N_HI-N_LO)*i/STEPS;
+    devs[i] = devOfN(ns[i]);
+  }
+  const candidates = [];
+  for(let i=1;i<STEPS;i++){
+    if(devs[i] < devs[i-1] && devs[i] <= devs[i+1] && devs[i] < 0.7){
+      const [n, dev] = goldenMin(devOfN, ns[i-1], ns[i+1]);
+      if(dev < 2e-3 && (!candidates.length || n - candidates[candidates.length-1].n > 0.02)){
+        candidates.push({n, r: rp.L/(TAU*n), dev});
+      }
+    }
+  }
+  return {ns, devs, candidates};
+}
+
+/* ================= pose + trace + mesh ================= */
+// integrate poses over nPer periods at the chosen r, world scaled so r = 1
+function buildPoses(rp2, r, nPer){
+  const {dirs, L, N} = rp2;             // rp2: fine resample, N per period
+  const M = nPer*N;                     // samples over all periods until closure
+  const half = (L/N)/r/2;
+  const sh = Math.sin(half), ch = Math.cos(half);
+  const quats = new Float64Array(4*(M+1));
+  const contact = new Float32Array(3*(M+1));  // body-frame contact dirs (unit)
+  let q = [1,0,0,0];
+  for(let i=0;i<=M;i++){
+    quats.set(q, 4*i);
+    const cb = qrotInv(q, 0, -1, 0);
+    contact[3*i] = cb[0]; contact[3*i+1] = cb[1]; contact[3*i+2] = cb[2];
+    if(i===M) break;
+    const k = i % N;
+    const vx = dirs[2*k], vz = -dirs[2*k+1];
+    q = qmulL(ch, sh*vz, -sh*vx, q);
+    if((i & 31) === 31) q = qnorm(q);
+  }
+  // world positions over all periods (scaled by 1/r), path plane z = -y
+  const sc = 1/r;
+  const pos = new Float32Array(2*(M+1));
+  const dX = (rp2.xs[N]-rp2.xs[0])*sc, dZ = -(rp2.ys[N]-rp2.ys[0])*sc;
+  for(let i=0;i<=M;i++){
+    const k = i % N, per = Math.floor(i/N);
+    pos[2*i]   = rp2.xs[k]*sc + per*dX;
+    pos[2*i+1] = -rp2.ys[k]*sc + per*dZ;
+  }
+  return {quats, contact, pos, M, nPer, Lw: L*sc, dX, dZ};
+}
+
+// icosphere cache (unit directions + faces), subdivision 5
+let SPHERE = null;
+function icosphere(sub){
+  const t = (1+Math.sqrt(5))/2;
+  let verts = [
+    [-1, t, 0],[1, t, 0],[-1,-t, 0],[1,-t, 0],
+    [0,-1, t],[0, 1, t],[0,-1,-t],[0, 1,-t],
+    [ t, 0,-1],[t, 0, 1],[-t, 0,-1],[-t, 0, 1]
+  ].map(v => { const m=Math.hypot(...v); return [v[0]/m,v[1]/m,v[2]/m]; });
+  let faces = [
+    [0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],
+    [1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],
+    [3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],
+    [4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]
+  ];
+  for(let s=0;s<sub;s++){
+    const cache = new Map();
+    const mid = (a,b) => {
+      const key = a<b ? a*1e6+b : b*1e6+a;
+      if(cache.has(key)) return cache.get(key);
+      const va=verts[a], vb=verts[b];
+      let v=[va[0]+vb[0], va[1]+vb[1], va[2]+vb[2]];
+      const m=Math.hypot(...v);
+      verts.push([v[0]/m, v[1]/m, v[2]/m]);
+      cache.set(key, verts.length-1);
+      return verts.length-1;
+    };
+    const nf=[];
+    for(const [a,b,c] of faces){
+      const ab=mid(a,b), bc=mid(b,c), ca=mid(c,a);
+      nf.push([a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca]);
+    }
+    faces = nf;
+  }
+  const V = new Float32Array(verts.length*3);
+  verts.forEach((v,i)=>V.set(v,3*i));
+  return {V, faces, nv:verts.length};
+}
+
+// per-vertex support: max over trace of (v̂ · q̂). radius = min(R, 1/maxdot)
+function meshSupport(contact, M){
+  if(!SPHERE) SPHERE = icosphere(5);
+  const {V, nv} = SPHERE;
+  const stride = Math.max(2, Math.round(M/1500));
+  const nt = Math.floor(M/stride);
+  const md = new Float32Array(nv);
+  for(let i=0;i<nv;i++){
+    const vx=V[3*i], vy=V[3*i+1], vz=V[3*i+2];
+    let m = -1;
+    for(let j=0;j<nt;j++){
+      const k = 3*(j*stride);
+      const d = vx*contact[k] + vy*contact[k+1] + vz*contact[k+2];
+      if(d > m) m = d;
+    }
+    md[i] = m;
+  }
+  return md;
+}
+// flat-shaded interleaved [pos3, nrm3, cut1] from support values + shell R
+function meshVertices(md, R){
+  const {V, faces} = SPHERE;
+  const F = faces.length;
+  const out = new Float32Array(F*3*7);
+  const px=[0,0,0], py=[0,0,0], pz=[0,0,0];
+  let cut3 = 0;
+  let o = 0;
+  for(let f=0; f<F; f++){
+    const tri = faces[f];
+    cut3 = 0;
+    for(let k=0;k<3;k++){
+      const i = tri[k];
+      const rad = md[i] > 1/R ? 1/md[i] : R;
+      if(rad < R - 1e-4) cut3++;
+      px[k]=V[3*i]*rad; py[k]=V[3*i+1]*rad; pz[k]=V[3*i+2]*rad;
+    }
+    let nx=(py[1]-py[0])*(pz[2]-pz[0])-(pz[1]-pz[0])*(py[2]-py[0]);
+    let ny=(pz[1]-pz[0])*(px[2]-px[0])-(px[1]-px[0])*(pz[2]-pz[0]);
+    let nz=(px[1]-px[0])*(py[2]-py[0])-(py[1]-py[0])*(px[2]-px[0]);
+    const nm=Math.hypot(nx,ny,nz)||1; nx/=nm; ny/=nm; nz/=nm;
+    const cut = cut3/3;
+    for(let k=0;k<3;k++){
+      out[o++]=px[k]; out[o++]=py[k]; out[o++]=pz[k];
+      out[o++]=nx; out[o++]=ny; out[o++]=nz;
+      out[o++]=cut;
+    }
+  }
+  return out;
+}
+// amber trace as a thin ribbon hugging the surface (body frame)
+function traceRibbon(contact, M){
+  const step = Math.max(2, Math.round(M/2200)), n = Math.floor(M/step);
+  const out = new Float32Array((n+1)*2*3);
+  const W = 0.016, LIFT = 1.012;
+  let o = 0;
+  for(let i=0;i<=n;i++){
+    const a = Math.min(i*step, M);
+    const ap = Math.max(0, a-step), an = Math.min(M, a+step);
+    const qx=contact[3*a], qy=contact[3*a+1], qz=contact[3*a+2];
+    const tx=contact[3*an]-contact[3*ap], ty=contact[3*an+1]-contact[3*ap+1], tz=contact[3*an+2]-contact[3*ap+2];
+    let sx=qy*tz-qz*ty, sy=qz*tx-qx*tz, sz=qx*ty-qy*tx;
+    const sm=Math.hypot(sx,sy,sz)||1e-9;
+    sx=sx/sm*W; sy=sy/sm*W; sz=sz/sm*W;
+    out[o++]=qx*LIFT+sx; out[o++]=qy*LIFT+sy; out[o++]=qz*LIFT+sz;
+    out[o++]=qx*LIFT-sx; out[o++]=qy*LIFT-sy; out[o++]=qz*LIFT-sz;
+  }
+  return out;
+}
+// ground ribbon: 4 tiles of the period, param = arc length from tile 0 start
+function groundRibbon(poses, rp2){
+  const {pos, M, nPer, dX, dZ, Lw} = poses;
+  const N = M/nPer;                         // samples in one period
+  const step = 4, S = Math.floor(N/step);
+  const W = 0.045, TILES_BACK = 1, TILES_FWD = 3;
+  const rows = [];
+  for(let t=-TILES_BACK; t<TILES_FWD; t++){
+    for(let j=0;j<=S;j++){
+      const i = Math.min(j*step, N);
+      rows.push([pos[2*i] + t*dX, pos[2*i+1] + t*dZ, t*Lw + (i/N)*Lw]);
+    }
+  }
+  const out = new Float32Array(rows.length*2*4);
+  let o = 0;
+  for(let k=0;k<rows.length;k++){
+    const [x,z,par] = rows[k];
+    const kp = Math.max(0,k-1), kn = Math.min(rows.length-1,k+1);
+    let dx = rows[kn][0]-rows[kp][0], dz = rows[kn][1]-rows[kp][1];
+    const m = Math.hypot(dx,dz)||1;
+    const nx = -dz/m*W, nz = dx/m*W;
+    out[o++]=x+nx; out[o++]=0.004; out[o++]=z+nz; out[o++]=par;
+    out[o++]=x-nx; out[o++]=0.004; out[o++]=z-nz; out[o++]=par;
+  }
+  return {data: out, verts: rows.length*2, rowsPerTile: (S+1)*2};
+}
+
+/* ================= renderer ================= */
+const canvas = $('gl');
+const gl = canvas.getContext('webgl', {antialias:true});
+function shader(type, src){
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src); gl.compileShader(s);
+  if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+function program(vsrc, fsrc){
+  const p = gl.createProgram();
+  gl.attachShader(p, shader(gl.VERTEX_SHADER, vsrc));
+  gl.attachShader(p, shader(gl.FRAGMENT_SHADER, fsrc));
+  gl.linkProgram(p);
+  if(!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  const u = {}, a = {};
+  const nu = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+  for(let i=0;i<nu;i++){ const info = gl.getActiveUniform(p,i); u[info.name] = gl.getUniformLocation(p, info.name); }
+  const na = gl.getProgramParameter(p, gl.ACTIVE_ATTRIBUTES);
+  for(let i=0;i<na;i++){ const info = gl.getActiveAttrib(p,i); a[info.name] = gl.getAttribLocation(p, info.name); }
+  return {p, u, a};
+}
+const meshProg = program(`
+  attribute vec3 aPos; attribute vec3 aNrm; attribute float aCut;
+  uniform mat4 uMVP; uniform mat4 uModel;
+  varying vec3 vN; varying float vCut; varying vec3 vW;
+  void main(){
+    vN = mat3(uModel[0].xyz, uModel[1].xyz, uModel[2].xyz) * aNrm;
+    vCut = aCut;
+    vec4 w = uModel * vec4(aPos,1.0);
+    vW = w.xyz;
+    gl_Position = uMVP * vec4(aPos,1.0);
+  }`,`
+  precision mediump float;
+  varying vec3 vN; varying float vCut; varying vec3 vW;
+  uniform vec3 uEye; uniform vec3 uBase; uniform vec3 uCutCol;
+  void main(){
+    vec3 N = normalize(vN);
+    vec3 V = normalize(uEye - vW);
+    vec3 key = normalize(vec3(-0.5, 0.85, 0.45));
+    vec3 fil = normalize(vec3(0.7, 0.25, -0.5));
+    float d = max(dot(N,key),0.0)*0.75 + max(dot(N,fil),0.0)*0.28
+            + (N.y*0.5+0.5)*0.30 + 0.10;
+    float rim = pow(1.0 - abs(dot(N,V)), 3.0) * 0.18;
+    vec3 base = mix(uBase, uCutCol, vCut);
+    gl_FragColor = vec4(base*d + rim, 1.0);
+  }`);
+const ribbonProg = program(`
+  attribute vec3 aPos; attribute float aPar;
+  uniform mat4 uMVP; uniform vec3 uOff;
+  varying float vPar; varying vec3 vW;
+  void main(){
+    vec3 w = aPos + uOff;
+    vW = w; vPar = aPar;
+    gl_Position = uMVP * vec4(w,1.0);
+  }`,`
+  precision mediump float;
+  varying float vPar; varying vec3 vW;
+  uniform float uProg; uniform vec3 uColA; uniform vec3 uColB;
+  uniform vec3 uCenter; uniform float uFade;
+  void main(){
+    float behind = 1.0 - smoothstep(-0.02, 0.25, vPar - uProg);
+    vec3 col = mix(uColB, uColA, behind);
+    float dist = length(vW - uCenter);
+    float a = (1.0 - smoothstep(uFade*0.55, uFade, dist)) * mix(0.55, 0.95, behind);
+    gl_FragColor = vec4(col, a);
+  }`);
+const lineProg = program(`
+  attribute vec3 aPos;
+  uniform mat4 uMVP; uniform mat4 uModel;
+  varying vec3 vW;
+  void main(){
+    vec4 w = uModel * vec4(aPos,1.0);
+    vW = w.xyz;
+    gl_Position = uMVP * vec4(aPos,1.0);
+  }`,`
+  precision mediump float;
+  varying vec3 vW;
+  uniform vec4 uColor; uniform vec3 uCenter; uniform float uFade;
+  void main(){
+    float dist = length(vW - uCenter);
+    float a = uColor.a * (1.0 - smoothstep(uFade*0.5, uFade, dist));
+    gl_FragColor = vec4(uColor.rgb, a);
+  }`);
+const flatProg = program(`
+  attribute vec3 aPos;
+  uniform mat4 uMVP; uniform mat4 uModel;
+  void main(){ gl_Position = uMVP * uModel * vec4(aPos,1.0); }`,`
+  precision mediump float;
+  uniform vec4 uColor;
+  void main(){ gl_FragColor = uColor; }`);
+const shadowProg = program(`
+  attribute vec2 aUV;
+  uniform mat4 uMVP; uniform vec3 uPos; uniform float uR;
+  varying vec2 vUV;
+  void main(){
+    vUV = aUV;
+    vec3 w = uPos + vec3(aUV.x*uR, 0.006, aUV.y*uR);
+    gl_Position = uMVP * vec4(w,1.0);
+  }`,`
+  precision mediump float;
+  varying vec2 vUV;
+  uniform float uA;
+  void main(){
+    float a = (1.0 - smoothstep(0.35, 1.0, length(vUV))) * uA;
+    gl_FragColor = vec4(0.02, 0.03, 0.05, a);
+  }`);
+
+function makeBuf(data){
+  const b = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, b);
+  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+  return b;
+}
+// static geometry: grid lines, ghost sphere wires, shadow quad
+const gridBuf = (() => {
+  const E = 60, lines = [];
+  for(let i=-E;i<=E;i++){
+    lines.push(i,0,-E, i,0,E);
+    lines.push(-E,0,i, E,0,i);
+  }
+  return {b: makeBuf(new Float32Array(lines)), n: lines.length/3};
+})();
+const ghostBuf = (() => {
+  const seg = [], NP = 64;
+  for(let m=0;m<10;m++){                      // meridians
+    const ph = m*Math.PI/10;
+    for(let i=0;i<NP;i++){
+      const a=i/NP*TAU, b=(i+1)/NP*TAU;
+      seg.push(Math.cos(a)*Math.cos(ph), Math.sin(a), Math.cos(a)*Math.sin(ph),
+               Math.cos(b)*Math.cos(ph), Math.sin(b), Math.cos(b)*Math.sin(ph));
+    }
+  }
+  for(let p=1;p<6;p++){                       // parallels
+    const y = Math.cos(p*Math.PI/6), rr = Math.sin(p*Math.PI/6);
+    for(let i=0;i<NP;i++){
+      const a=i/NP*TAU, b=(i+1)/NP*TAU;
+      seg.push(rr*Math.cos(a), y, rr*Math.sin(a), rr*Math.cos(b), y, rr*Math.sin(b));
+      seg.push(rr*Math.cos(a), -y, rr*Math.sin(a), rr*Math.cos(b), -y, rr*Math.sin(b));
+    }
+  }
+  return {b: makeBuf(new Float32Array(seg)), n: seg.length/3};
+})();
+const shadowBuf = makeBuf(new Float32Array([-1,-1, 1,-1, -1,1, 1,1]));
+
+/* ================= theme colors ================= */
+function cssColor(name){
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const c = document.createElement('canvas').getContext('2d');
+  c.fillStyle = v; c.fillRect(0,0,1,1);
+  const d = c.getImageData(0,0,1,1).data;
+  return [d[0]/255, d[1]/255, d[2]/255];
+}
+let TH = {};
+function readTheme(){
+  TH = {
+    bg: cssColor('--v-bg'), grid: cssColor('--v-grid'),
+    ribbon: cssColor('--v-ribbon'), ribbonDim: cssColor('--v-ribbon-dim'),
+    trace: cssColor('--v-trace'), ghost: cssColor('--v-ghost'),
+    base: [0.755, 0.775, 0.80], cut: [0.855, 0.83, 0.775],
+    dark: matchMedia('(prefers-color-scheme: dark)').matches
+  };
+  drawEditor();
+  if(state.scan) drawScan();
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTheme);
+new MutationObserver(readTheme).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+
+/* ================= app state ================= */
+const state = {
+  pathPts: samplePreset(PRESETS.sine),
+  preset: 'sine',
+  scan: null, candidates: [], selected: -1,
+  closureN: 2,
+  poses: null, r: 0, n: 0, dev: 0,
+  shellR: 1.25,
+  support: null,
+  bufs: {mesh:null, meshN:0, trace:null, traceN:0, ground:null, groundN:0, groundTile:0},
+  s: 0,
+  playing: !matchMedia('(prefers-reduced-motion: reduce)').matches,
+  speed: 0.16,
+  showTrace: true, showCore: false, follow: true,
+  cam: {yaw: -0.55, pitch: 0.42, dist: 7.5, tx: 0, ty: 0.9, tz: 0},
+};
+
+/* ================= solve pipeline ================= */
+const statusEl = $('status');
+function solve(keepN){
+  statusEl.textContent = 'Solving…';
+  statusEl.classList.remove('warn');
+  requestAnimationFrame(() => setTimeout(() => {
+    const rp = resamplePath(state.pathPts, 1024);
+    const scan = solveClosure(rp, state.closureN);
+    state.scan = scan;
+    state.candidates = scan.candidates;
+    if(!scan.candidates.length){
+      state.selected = -1;
+      statusEl.textContent = `No radius closes after ${state.closureN} periods in range — try another period count or a wavier path.`;
+      statusEl.classList.add('warn');
+      $('ro-r').textContent = $('ro-n').textContent = $('ro-dev').textContent = '—';
+      drawScan();
+      return;
+    }
+    let sel = 0;
+    if(keepN != null){
+      let best = Infinity;
+      scan.candidates.forEach((c,i) => { const d = Math.abs(c.n-keepN); if(d<best){best=d; sel=i;} });
+    }
+    pick(sel);
+  }, 10));
+}
+function pick(idx){
+  const c = state.candidates[idx];
+  state.selected = idx;
+  state.r = c.r; state.n = c.n; state.dev = c.dev;
+  const rp2 = resamplePath(state.pathPts, 2048);
+  state.poses = buildPoses(rp2, c.r, state.closureN);
+  state.support = meshSupport(state.poses.contact, state.poses.M);
+  rebuildMesh();
+  const tr = traceRibbon(state.poses.contact, state.poses.M);
+  if(state.bufs.trace) gl.deleteBuffer(state.bufs.trace);
+  state.bufs.trace = makeBuf(tr);
+  state.bufs.traceN = tr.length/3;
+  const gr = groundRibbon(state.poses, rp2);
+  if(state.bufs.ground) gl.deleteBuffer(state.bufs.ground);
+  state.bufs.ground = makeBuf(gr.data);
+  state.bufs.groundN = gr.verts;
+  state.s = 0;
+  $('ro-r').textContent = c.r.toFixed(4) + ' · period';
+  $('ro-n').textContent = c.n.toFixed(3);
+  $('ro-dev').textContent = (c.dev*180/Math.PI).toExponential(1) + '°';
+  statusEl.textContent = `${state.candidates.length} closing ${state.candidates.length===1?'radius':'radii'} found · trace closes after ${state.closureN} periods.`;
+  drawScan();
+}
+function rebuildMesh(){
+  if(!state.support) return;
+  const mv = meshVertices(state.support, state.shellR);
+  if(state.bufs.mesh) gl.deleteBuffer(state.bufs.mesh);
+  state.bufs.mesh = makeBuf(mv);
+  state.bufs.meshN = mv.length/7;
+}
+
+/* ================= scan chart ================= */
+const scanSvg = $('scan'), scanTip = $('scantip');
+function drawScan(){
+  const scan = state.scan;
+  if(!scan) return;
+  scanTip.style.display = 'none';
+  const W = scanSvg.clientWidth || 290, H = 110;
+  scanSvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const padL = 6, padR = 6, padT = 8, padB = 16;
+  const nLo = scan.ns[0], nHi = scan.ns[scan.ns.length-1];
+  const yLo = -6.2, yHi = 0.7;               // log10 rad
+  const X = n => padL + (n-nLo)/(nHi-nLo)*(W-padL-padR);
+  const Y = d => {
+    const l = Math.max(yLo, Math.min(yHi, Math.log10(d+1e-9)));
+    return padT + (yHi-l)/(yHi-yLo)*(H-padT-padB);
+  };
+  const css = getComputedStyle(document.documentElement);
+  const cLine = css.getPropertyValue('--ink-3').trim();
+  const cGrid = css.getPropertyValue('--line').trim();
+  const cInk2 = css.getPropertyValue('--ink-2').trim();
+  const cAcc  = css.getPropertyValue('--accent').trim();
+  const cAmb  = css.getPropertyValue('--amber').trim();
+  let g = '';
+  for(let n=1;n<=8;n++){
+    g += `<line x1="${X(n)}" y1="${padT}" x2="${X(n)}" y2="${H-padB}" stroke="${cGrid}" stroke-width="1"/>`;
+    g += `<text x="${X(n)}" y="${H-4}" fill="${cInk2}" font-size="9" text-anchor="middle" font-family="IBM Plex Mono,monospace">${n}</text>`;
+  }
+  let d = '';
+  const step = Math.max(1, Math.floor(scan.ns.length/360));
+  for(let i=0;i<scan.ns.length;i+=step){
+    d += (i? 'L':'M') + X(scan.ns[i]).toFixed(1) + ' ' + Y(scan.devs[i]).toFixed(1);
+  }
+  let dots = '';
+  state.candidates.forEach((c,i) => {
+    const sel = i === state.selected;
+    dots += `<g class="cand" data-i="${i}" style="cursor:pointer">
+      <circle cx="${X(c.n)}" cy="${Y(c.dev)}" r="11" fill="transparent"/>
+      ${sel ? `<circle cx="${X(c.n)}" cy="${Y(c.dev)}" r="7.5" fill="none" stroke="${cAmb}" stroke-width="1.5"/>` : ''}
+      <circle cx="${X(c.n)}" cy="${Y(c.dev)}" r="4" fill="${sel? cAcc : 'none'}" stroke="${cAcc}" stroke-width="1.6"/>
+    </g>`;
+  });
+  scanSvg.innerHTML = g
+    + `<path d="${d}" fill="none" stroke="${cLine}" stroke-width="1.4" stroke-linejoin="round"/>`
+    + dots;
+  scanSvg.querySelectorAll('.cand').forEach(el => {
+    el.addEventListener('click', () => pick(+el.dataset.i));
+  });
+}
+scanSvg.addEventListener('pointermove', e => {
+  const scan = state.scan;
+  if(!scan) return;
+  const rect = scanSvg.getBoundingClientRect();
+  const fx = (e.clientX-rect.left)/rect.width;
+  const i = Math.max(0, Math.min(scan.ns.length-1, Math.round(fx*(scan.ns.length-1))));
+  scanTip.style.display = 'block';
+  scanTip.style.left = (e.clientX-rect.left) + 'px';
+  scanTip.style.top = '38px';
+  scanTip.textContent = `n ${scan.ns[i].toFixed(2)} · ${(scan.devs[i]*180/Math.PI).toPrecision(2)}°`;
+});
+scanSvg.addEventListener('pointerleave', () => scanTip.style.display = 'none');
+
+/* ================= path editor ================= */
+const ed = $('editor'), ectx = ed.getContext('2d');
+const EY = 0.48;                              // y range shown: ±EY
+let drawing = null;
+function edSize(){
+  const dpr = devicePixelRatio || 1;
+  const w = ed.clientWidth, h = ed.clientHeight;
+  if(ed.width !== Math.round(w*dpr)){ ed.width = Math.round(w*dpr); ed.height = Math.round(h*dpr); }
+  return {w, h, dpr};
+}
+function pxOf(x, y, w, h){ return [x*w, h/2 - y/(2*EY)*h]; }
+function drawEditor(){
+  const {w, h, dpr} = edSize();
+  ectx.setTransform(dpr,0,0,dpr,0,0);
+  ectx.clearRect(0,0,w,h);
+  const css = getComputedStyle(document.documentElement);
+  const cGrid = css.getPropertyValue('--line').trim();
+  const cAcc = css.getPropertyValue('--accent').trim();
+  const cInk3 = css.getPropertyValue('--ink-3').trim();
+  const cAmb = css.getPropertyValue('--v-trace').trim();
+  ectx.strokeStyle = cGrid; ectx.lineWidth = 1;
+  ectx.beginPath();
+  for(let i=1;i<4;i++){ ectx.moveTo(w*i/4, 0); ectx.lineTo(w*i/4, h); }
+  ectx.stroke();
+  ectx.setLineDash([3,4]);
+  ectx.strokeStyle = cInk3; ectx.globalAlpha = 0.6;
+  ectx.beginPath(); ectx.moveTo(0, h/2); ectx.lineTo(w, h/2); ectx.stroke();
+  ectx.setLineDash([]); ectx.globalAlpha = 1;
+  const plot = (pts, dx, alpha, width, color) => {
+    ectx.strokeStyle = color; ectx.globalAlpha = alpha; ectx.lineWidth = width;
+    ectx.lineJoin = 'round'; ectx.lineCap = 'round';
+    ectx.beginPath();
+    pts.forEach((p,i) => {
+      const [px,py] = pxOf(p[0]+dx, p[1], w, h);
+      i ? ectx.lineTo(px,py) : ectx.moveTo(px,py);
+    });
+    ectx.stroke(); ectx.globalAlpha = 1;
+  };
+  if(drawing && drawing.length > 1){
+    plot(drawing, 0, 0.95, 2, cAmb);
+  } else {
+    plot(state.pathPts, -1, 0.30, 1.2, cAcc);
+    plot(state.pathPts,  1, 0.30, 1.2, cAcc);
+    plot(state.pathPts,  0, 1, 2, cAcc);
+  }
+}
+function edPoint(e){
+  const rect = ed.getBoundingClientRect();
+  const x = (e.clientX-rect.left)/rect.width;
+  const y = (0.5 - (e.clientY-rect.top)/rect.height) * 2*EY;
+  return [Math.max(0,Math.min(1,x)), Math.max(-EY,Math.min(EY,y))];
+}
+ed.addEventListener('pointerdown', e => {
+  ed.setPointerCapture(e.pointerId);
+  drawing = [edPoint(e)];
+  e.preventDefault();
+});
+ed.addEventListener('pointermove', e => {
+  if(!drawing) return;
+  const p = edPoint(e);
+  if(p[0] > drawing[drawing.length-1][0] + 0.004) drawing.push(p);
+  drawEditor();
+});
+ed.addEventListener('pointerup', () => {
+  if(drawing && drawing.length > 6){
+    let pts = drawing;
+    // stretch drawn x-span to a full period, remove the linear ramp, smooth
+    const x0 = pts[0][0], x1 = pts[pts.length-1][0];
+    pts = pts.map(p => [(p[0]-x0)/(x1-x0), p[1]]);
+    const y0 = pts[0][1], y1 = pts[pts.length-1][1];
+    pts = pts.map(p => [p[0], p[1] - y0 - (y1-y0)*p[0]]);
+    for(let pass=0; pass<2; pass++){
+      for(let i=1;i<pts.length-1;i++){
+        pts[i][1] = (pts[i-1][1] + 2*pts[i][1] + pts[i+1][1]) / 4;
+      }
+    }
+    state.pathPts = pts;
+    state.preset = null;
+    document.querySelectorAll('#presets .chip').forEach(b => b.setAttribute('aria-pressed','false'));
+    solve();
+  }
+  drawing = null;
+  drawEditor();
+});
+$('periods').addEventListener('click', e => {
+  const b = e.target.closest('.chip');
+  if(!b) return;
+  state.closureN = +b.dataset.n;
+  document.querySelectorAll('#periods .chip').forEach(x => x.setAttribute('aria-pressed', String(x===b)));
+  solve(state.selected >= 0 ? state.n : null);
+});
+$('presets').addEventListener('click', e => {
+  const b = e.target.closest('.chip');
+  if(!b) return;
+  state.preset = b.dataset.preset;
+  state.pathPts = samplePreset(PRESETS[state.preset]);
+  document.querySelectorAll('#presets .chip').forEach(x => x.setAttribute('aria-pressed', String(x===b)));
+  drawEditor();
+  solve();
+});
+
+/* ================= controls ================= */
+const playBtn = $('play');
+const ICON_PLAY = '<svg width="12" height="14" viewBox="0 0 12 14"><path d="M1 1l10 6-10 6z" fill="currentColor"/></svg>';
+const ICON_PAUSE = '<svg width="12" height="14" viewBox="0 0 12 14"><rect x="1" y="1" width="3.4" height="12" fill="currentColor"/><rect x="7.6" y="1" width="3.4" height="12" fill="currentColor"/></svg>';
+function setPlay(v){
+  state.playing = v;
+  playBtn.innerHTML = v ? ICON_PAUSE : ICON_PLAY;
+}
+playBtn.addEventListener('click', () => setPlay(!state.playing));
+addEventListener('keydown', e => {
+  if(e.code === 'Space' && !e.target.matches('input,button')){ e.preventDefault(); setPlay(!state.playing); }
+});
+setPlay(state.playing);
+$('speed').addEventListener('input', e => {
+  state.speed = +e.target.value;
+  $('speedout').textContent = state.speed.toFixed(2) + ' T/s';
+});
+let shellTimer = 0;
+$('shell').addEventListener('input', e => {
+  state.shellR = +e.target.value;
+  $('shellout').textContent = state.shellR.toFixed(2);
+  clearTimeout(shellTimer);
+  shellTimer = setTimeout(rebuildMesh, 80);
+});
+$('tg-trace').addEventListener('change', e => state.showTrace = e.target.checked);
+$('tg-core').addEventListener('change', e => state.showCore = e.target.checked);
+$('tg-follow').addEventListener('change', e => state.follow = e.target.checked);
+
+/* orbit camera */
+let drag = null;
+canvas.addEventListener('pointerdown', e => {
+  canvas.setPointerCapture(e.pointerId);
+  canvas.classList.add('dragging');
+  drag = {x: e.clientX, y: e.clientY};
+});
+canvas.addEventListener('pointermove', e => {
+  if(!drag) return;
+  state.cam.yaw   -= (e.clientX-drag.x)*0.006;
+  state.cam.pitch += (e.clientY-drag.y)*0.005;
+  state.cam.pitch = Math.max(0.06, Math.min(1.35, state.cam.pitch));
+  drag = {x: e.clientX, y: e.clientY};
+});
+canvas.addEventListener('pointerup', () => { drag = null; canvas.classList.remove('dragging'); });
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  state.cam.dist *= Math.exp(e.deltaY*0.0012);
+  state.cam.dist = Math.max(2.5, Math.min(40, state.cam.dist));
+}, {passive:false});
+
+/* ================= render loop ================= */
+const proj = M4(), view = M4(), vp = M4(), mvp = M4(), model = M4(), ident = mat4Identity(M4());
+let lastT = performance.now();
+function frame(now){
+  requestAnimationFrame(frame);
+  const dt = Math.min(0.05, (now-lastT)/1000);
+  lastT = now;
+  const dpr = Math.min(2, devicePixelRatio||1);
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  if(canvas.width !== Math.round(W*dpr)){ canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr); }
+  gl.viewport(0,0,canvas.width,canvas.height);
+  gl.clearColor(TH.bg[0], TH.bg[1], TH.bg[2], 1);
+  gl.enable(gl.DEPTH_TEST);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  const P = state.poses;
+  let bx = 0, bz = 0, q = [1,0,0,0], baseK = 0, sLocal = 0;
+  if(P){
+    if(state.playing) state.s += state.speed * dt * P.Lw;
+    const L2 = P.nPer*P.Lw;
+    const sm = ((state.s % L2) + L2) % L2;
+    const idx = Math.min(P.M, Math.round(sm/L2*P.M));
+    q = [P.quats[4*idx], P.quats[4*idx+1], P.quats[4*idx+2], P.quats[4*idx+3]];
+    const k2 = Math.floor(state.s/L2);
+    bx = P.pos[2*idx] + k2*P.nPer*P.dX;
+    bz = P.pos[2*idx+1] + k2*P.nPer*P.dZ;
+    baseK = Math.floor(state.s/P.Lw);
+    sLocal = state.s - baseK*P.Lw;
+  }
+  const c = state.cam;
+  if(state.follow && P){
+    const a = 1 - Math.exp(-dt*4);
+    c.tx += (bx - c.tx)*a; c.tz += (bz - c.tz)*a; c.ty += (0.9 - c.ty)*a;
+  }
+  const eye = [
+    c.tx + c.dist*Math.cos(c.pitch)*Math.sin(c.yaw),
+    c.ty + c.dist*Math.sin(c.pitch),
+    c.tz + c.dist*Math.cos(c.pitch)*Math.cos(c.yaw)
+  ];
+  mat4Persp(proj, 40*Math.PI/180, W/H, 0.05, 400);
+  mat4LookAt(view, eye, [c.tx, c.ty, c.tz], [0,1,0]);
+  mat4Mul(vp, proj, view);
+  const fade = c.dist*4 + 12;
+
+  // --- body mesh (opaque) ---
+  if(P && state.bufs.mesh){
+    mat4FromQuatPos(model, q, bx, 1, bz);
+    mat4Mul(mvp, vp, model);
+    gl.useProgram(meshProg.p);
+    gl.uniformMatrix4fv(meshProg.u.uMVP, false, mvp);
+    gl.uniformMatrix4fv(meshProg.u.uModel, false, model);
+    gl.uniform3fv(meshProg.u.uEye, eye);
+    gl.uniform3fv(meshProg.u.uBase, TH.base);
+    gl.uniform3fv(meshProg.u.uCutCol, TH.cut);
+    gl.bindBuffer(gl.ARRAY_BUFFER, state.bufs.mesh);
+    gl.enableVertexAttribArray(meshProg.a.aPos);
+    gl.enableVertexAttribArray(meshProg.a.aNrm);
+    gl.enableVertexAttribArray(meshProg.a.aCut);
+    gl.vertexAttribPointer(meshProg.a.aPos, 3, gl.FLOAT, false, 28, 0);
+    gl.vertexAttribPointer(meshProg.a.aNrm, 3, gl.FLOAT, false, 28, 12);
+    gl.vertexAttribPointer(meshProg.a.aCut, 1, gl.FLOAT, false, 28, 24);
+    gl.drawArrays(gl.TRIANGLES, 0, state.bufs.meshN);
+    gl.disableVertexAttribArray(meshProg.a.aNrm);
+    gl.disableVertexAttribArray(meshProg.a.aCut);
+  }
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  gl.depthMask(false);
+
+  // --- grid ---
+  {
+    const gx = Math.round(c.tx), gz = Math.round(c.tz);
+    mat4FromQuatPos(model, [1,0,0,0], gx, 0, gz);
+    mat4Mul(mvp, vp, model);
+    gl.useProgram(lineProg.p);
+    gl.uniformMatrix4fv(lineProg.u.uMVP, false, mvp);
+    gl.uniformMatrix4fv(lineProg.u.uModel, false, model);
+    gl.uniform4f(lineProg.u.uColor, TH.grid[0], TH.grid[1], TH.grid[2], 0.85);
+    gl.uniform3f(lineProg.u.uCenter, c.tx, 0, c.tz);
+    gl.uniform1f(lineProg.u.uFade, fade);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gridBuf.b);
+    gl.enableVertexAttribArray(lineProg.a.aPos);
+    gl.vertexAttribPointer(lineProg.a.aPos, 3, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.LINES, 0, gridBuf.n);
+  }
+
+  // --- ground path ribbon ---
+  if(P && state.bufs.ground){
+    gl.useProgram(ribbonProg.p);
+    gl.uniformMatrix4fv(ribbonProg.u.uMVP, false, vp);
+    gl.uniform3f(ribbonProg.u.uOff, baseK*P.dX, 0, baseK*P.dZ);
+    gl.uniform1f(ribbonProg.u.uProg, sLocal);
+    gl.uniform3fv(ribbonProg.u.uColA, TH.ribbon);
+    gl.uniform3fv(ribbonProg.u.uColB, TH.ribbonDim);
+    gl.uniform3f(ribbonProg.u.uCenter, c.tx, 0, c.tz);
+    gl.uniform1f(ribbonProg.u.uFade, fade);
+    gl.bindBuffer(gl.ARRAY_BUFFER, state.bufs.ground);
+    gl.enableVertexAttribArray(ribbonProg.a.aPos);
+    gl.enableVertexAttribArray(ribbonProg.a.aPar);
+    gl.vertexAttribPointer(ribbonProg.a.aPos, 3, gl.FLOAT, false, 16, 0);
+    gl.vertexAttribPointer(ribbonProg.a.aPar, 1, gl.FLOAT, false, 16, 12);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, state.bufs.groundN);
+    gl.disableVertexAttribArray(ribbonProg.a.aPar);
+  }
+
+  // --- contact shadow ---
+  if(P){
+    gl.useProgram(shadowProg.p);
+    gl.uniformMatrix4fv(shadowProg.u.uMVP, false, vp);
+    gl.uniform3f(shadowProg.u.uPos, bx, 0, bz);
+    gl.uniform1f(shadowProg.u.uR, state.shellR*0.92);
+    gl.uniform1f(shadowProg.u.uA, TH.dark ? 0.34 : 0.20);
+    gl.bindBuffer(gl.ARRAY_BUFFER, shadowBuf);
+    gl.enableVertexAttribArray(shadowProg.a.aUV);
+    gl.vertexAttribPointer(shadowProg.a.aUV, 2, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+  // --- ghost core sphere ---
+  if(P && state.showCore){
+    mat4FromQuatPos(model, q, bx, 1, bz);
+    mat4Mul(mvp, vp, model);
+    gl.useProgram(lineProg.p);
+    gl.uniformMatrix4fv(lineProg.u.uMVP, false, mvp);
+    gl.uniformMatrix4fv(lineProg.u.uModel, false, model);
+    gl.uniform4f(lineProg.u.uColor, TH.ghost[0], TH.ghost[1], TH.ghost[2], 0.35);
+    gl.uniform3f(lineProg.u.uCenter, c.tx, 0, c.tz);
+    gl.uniform1f(lineProg.u.uFade, fade);
+    gl.bindBuffer(gl.ARRAY_BUFFER, ghostBuf.b);
+    gl.enableVertexAttribArray(lineProg.a.aPos);
+    gl.vertexAttribPointer(lineProg.a.aPos, 3, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.LINES, 0, ghostBuf.n);
+  }
+
+  // --- trace ribbon on the body ---
+  if(P && state.showTrace && state.bufs.trace){
+    mat4FromQuatPos(model, q, bx, 1, bz);
+    mat4Mul(mvp, vp, model);
+    gl.useProgram(flatProg.p);
+    gl.uniformMatrix4fv(flatProg.u.uMVP, false, vp);
+    gl.uniformMatrix4fv(flatProg.u.uModel, false, model);
+    gl.uniform4f(flatProg.u.uColor, TH.trace[0], TH.trace[1], TH.trace[2], 0.96);
+    gl.bindBuffer(gl.ARRAY_BUFFER, state.bufs.trace);
+    gl.enableVertexAttribArray(flatProg.a.aPos);
+    gl.vertexAttribPointer(flatProg.a.aPos, 3, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, state.bufs.traceN);
+  }
+
+  gl.depthMask(true);
+  gl.disable(gl.BLEND);
+}
+
+/* ================= boot ================= */
+readTheme();
+drawEditor();
+addEventListener('resize', () => { drawEditor(); if(state.scan) drawScan(); });
+solve();
+requestAnimationFrame(frame);
+</script>
