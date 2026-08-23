@@ -1,0 +1,721 @@
+<meta charset="utf-8">
+<title>WordArt Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Luckiest+Guy&family=Fredoka:wght@700&family=Baloo+2:wght@800&family=Titan+One&family=Chewy&family=Bangers&family=Alfa+Slab+One&family=Anton&family=Oswald:wght@700&family=Bungee&family=Righteous&family=Bowlby+One&family=Pacifico&family=Lobster&family=Shrikhand&family=Kavoon&family=Sniglet:wght@800&family=Rubik+Mono+One&family=Black+Ops+One&family=Permanent+Marker&family=Bebas+Neue&family=Playfair+Display:ital,wght@1,900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f1ec; --panel:#ffffff; --ink:#1f1d1a; --muted:#7a756c; --line:#e6e1d8;
+  --accent:#e0553d; --accent2:#2f6b4f; --chip:#faf8f3; --field:#ffffff; --glow:rgba(255,255,255,1);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1c1a17; --panel:#262320; --ink:#f1ece2; --muted:#a49d90; --line:#3a352e;
+    --accent:#ff7a5c; --accent2:#6fbf8f; --chip:#2e2a25; --field:#1f1c19; --glow:rgba(255,255,255,.06);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1c1a17; --panel:#262320; --ink:#f1ece2; --muted:#a49d90; --line:#3a352e;
+  --accent:#ff7a5c; --accent2:#6fbf8f; --chip:#2e2a25; --field:#1f1c19; --glow:rgba(255,255,255,.06);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg);display:flex;flex-direction:column;font-size:13px}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.logo{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:7px;color:#fff;font-family:"Lilita One",Impact,sans-serif;font-size:18px;background:linear-gradient(160deg,#ffcf4a,#e0553d 60%,#8b1a1a);box-shadow:0 2px 0 #5a0f0f}
+.presets{display:flex;gap:6px;flex:1;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--chip);padding:5px 10px;border-radius:999px;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink)}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.actions{display:flex;gap:8px}
+.btn{border:1px solid var(--line);background:var(--panel);padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px;color:var(--ink)}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary:hover{filter:brightness(.95)}
+.layout{flex:1;display:grid;grid-template-columns:340px 1fr;min-height:0}
+.panel{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:6px 0 40px}
+.panel details{border-bottom:1px solid var(--line)}
+.panel summary{cursor:pointer;padding:10px 16px;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);list-style:none;display:flex;align-items:center;gap:8px;user-select:none}
+.panel summary::before{content:"▸";font-size:11px;transition:transform .15s}
+.panel details[open] summary::before{transform:rotate(90deg)}
+.panel summary:hover{color:var(--ink)}
+.sec{padding:2px 16px 12px;display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:104px 1fr auto;align-items:center;gap:8px;min-height:26px}
+.row.hidden{display:none}
+.row label{color:var(--ink);font-weight:500;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .val{font-variant-numeric:tabular-nums;color:var(--muted);font-size:11px;min-width:34px;text-align:right}
+.row input[type=range]{width:100%;accent-color:var(--accent)}
+.row input[type=color]{width:100%;height:26px;border:1px solid var(--line);border-radius:6px;padding:0 2px;background:var(--field);cursor:pointer}
+.row select,.row input[type=text]{width:100%;height:28px;border:1px solid var(--line);border-radius:6px;padding:0 8px;font:inherit;background:var(--field);color:var(--ink)}
+.row textarea{grid-column:1/-1;width:100%;min-height:64px;border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit;font-size:14px;resize:vertical;background:var(--field);color:var(--ink)}
+.row input[type=checkbox]{justify-self:start;width:16px;height:16px;accent-color:var(--accent)}
+.row.wide{grid-template-columns:1fr}
+.stage{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:12px;min-width:0;overflow:hidden;background:
+  radial-gradient(circle at 30% 20%,var(--glow) 0,transparent 50%),var(--bg)}
+.frame{max-width:100%;max-height:calc(100vh - 170px);display:grid;place-items:center;border-radius:6px;box-shadow:0 12px 40px rgba(0,0,0,.15),0 1px 0 rgba(0,0,0,.06);
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect width='12' height='12' fill='%23e4e4e4'/%3E%3Crect x='12' y='12' width='12' height='12' fill='%23e4e4e4'/%3E%3C/svg%3E")}
+canvas{display:block;max-width:100%;max-height:calc(100vh - 170px);width:auto;height:auto;border-radius:6px}
+.stage-foot{display:flex;gap:16px;align-items:center;color:var(--muted)}
+.chk{display:flex;align-items:center;gap:6px;cursor:pointer}
+.muted{color:var(--muted)}
+.sub{grid-column:1/-1;color:var(--muted);font-size:11px;margin-top:-4px}
+@media (max-width:820px){.layout{grid-template-columns:1fr}.panel{max-height:45vh;border-right:0;border-bottom:1px solid var(--line)}}
+
+</style>
+<header class="topbar">
+  <div class="brand"><span class="logo">A</span> WordArt Studio</div>
+  <div class="presets" id="presets"></div>
+  <div class="actions">
+    <button id="btnRandom" class="btn ghost" title="Randomize style">🎲 Random</button>
+    <button id="btnCopy" class="btn ghost" title="Copy PNG to clipboard">📋 Copy</button>
+    <button id="btnExport" class="btn primary" title="Download PNG">⬇ Export PNG</button>
+  </div>
+</header>
+<main class="layout">
+  <aside class="panel" id="panel"></aside>
+  <section class="stage" id="stage">
+    <div class="frame" id="frame"><canvas id="c" width="1200" height="800"></canvas></div>
+    <div class="stage-foot">
+      <label class="chk"><input type="checkbox" id="cropExport"> Crop export to content</label>
+      <span id="sizeLabel" class="muted"></span>
+    </div>
+  </section>
+</main>
+<script>
+'use strict';
+/* ---------------------------------------------------------------------------
+   WordArt Studio — canvas-based WordArt / AI-signage style text renderer
+   --------------------------------------------------------------------------- */
+
+const FONT_WEIGHTS = { 'Fredoka': 700, 'Baloo 2': 800, 'Oswald': 700, 'Sniglet': 800, 'Inter': 600, 'Playfair Display': 900 };
+const FONTS = ['Lilita One','Luckiest Guy','Fredoka','Baloo 2','Titan One','Chewy','Bangers','Alfa Slab One','Anton','Bebas Neue','Oswald','Bungee','Righteous','Bowlby One','Pacifico','Lobster','Shrikhand','Kavoon','Sniglet','Rubik Mono One','Black Ops One','Permanent Marker','Playfair Display','Impact','Arial Black'];
+
+const DEFAULTS = {
+  text: 'SUPER\nSAVINGS', font: 'Lilita One', fontSize: 170, letterSpacing: 2, lineHeight: 1.0, jitter: 0, rotate: 0,
+  fillType: 'gradient', fill1: '#ffe86b', fill2: '#ff9a2e', gradAngle: 90, gradScope: 'letter', gloss: 45,
+  s1w: 5, s1c: '#8b1a1a', s2w: 7, s2c: '#ffffff', s3w: 0, s3c: '#8b1a1a',
+  exDepth: 6, exAngle: 90, exColor: '#5a0f0f',
+  shX: 6, shY: 10, shBlur: 8, shColor: '#000000', shOpacity: 35,
+  warp: 'archUp', warpAmt: 30,
+  stitch: false, stitchColor: '#ffffff', stitchW: 2,
+  decor: 'none', decorColor: '#e62e2e', decorColor2: '#ffffff', decorPad: 30,
+  sparkles: 12, sparkleColor: '#ffd54a', sparkleShape: 'mixed', sparkleSize: 100, seed: 7,
+  bgType: 'gradient', bg1: '#ffd1dc', bg2: '#fff0c2', bgAngle: 135,
+  size: '1200x800',
+};
+
+const PRESETS = {
+  'Matcha Bubble': { text: 'REDEEM', font: 'Fredoka', fontSize: 190, letterSpacing: 6, lineHeight: 1, jitter: 0, rotate: -3,
+    fillType: 'gradient', fill1: '#9cc979', fill2: '#4f8a3c', gradAngle: 90, gradScope: 'letter', gloss: 65,
+    s1w: 4, s1c: '#3d6b2f', s2w: 9, s2c: '#fffaf0', s3w: 0, s3c: '#3d6b2f', exDepth: 5, exAngle: 90, exColor: '#2f5228',
+    shX: 0, shY: 10, shBlur: 14, shColor: '#4a5a30', shOpacity: 30, warp: 'none', warpAmt: 0,
+    stitch: true, stitchColor: '#ffffff', stitchW: 2, decor: 'none', decorColor: '#f3b6c4', decorColor2: '#ffffff', decorPad: 30,
+    sparkles: 14, sparkleColor: '#f5c04a', sparkleShape: 'mixed', sparkleSize: 100, bgType: 'radial', bg1: '#fbf4e6', bg2: '#efe3c9', bgAngle: 135 },
+  'SG61 Voucher': { text: '$61\nVOUCHER', font: 'Alfa Slab One', fontSize: 200, letterSpacing: 2, lineHeight: 0.95, jitter: 0, rotate: 0,
+    fillType: 'gradient', fill1: '#ff5a5a', fill2: '#9b0000', gradAngle: 90, gradScope: 'letter', gloss: 55,
+    s1w: 3, s1c: '#ffd98a', s2w: 2, s2c: '#6e0000', s3w: 0, s3c: '#ffffff', exDepth: 16, exAngle: 100, exColor: '#5c0000',
+    shX: 4, shY: 12, shBlur: 12, shColor: '#3a0000', shOpacity: 40, warp: 'none', warpAmt: 0,
+    stitch: false, stitchColor: '#ffffff', stitchW: 2, decor: 'none', decorColor: '#c8102e', decorColor2: '#8b0000', decorPad: 24,
+    sparkles: 16, sparkleColor: '#ffe08a', sparkleShape: 'stars', sparkleSize: 110, bgType: 'rays', bg1: '#ffffff', bg2: '#fff0f0', bgAngle: 0 },
+  'Retro Kopi': { text: 'KOPI\nSIEW DAI', font: 'Anton', fontSize: 200, letterSpacing: 4, lineHeight: 0.95, jitter: 0, rotate: 0,
+    fillType: 'solid', fill1: '#2e5b40', fill2: '#2e5b40', gradAngle: 90, gradScope: 'letter', gloss: 0,
+    s1w: 0, s1c: '#ffffff', s2w: 3, s2c: '#f6eee2', s3w: 0, s3c: '#ffffff', exDepth: 0, exAngle: 90, exColor: '#1d3d2a',
+    shX: 8, shY: 8, shBlur: 0, shColor: '#b9c4c9', shOpacity: 100, warp: 'none', warpAmt: 0,
+    stitch: false, stitchColor: '#ffffff', stitchW: 2, decor: 'box', decorColor: '#f6eee2', decorColor2: '#c84a2a', decorPad: 44,
+    sparkles: 0, sparkleColor: '#c84a2a', sparkleShape: 'stars', sparkleSize: 100, bgType: 'solid', bg1: '#fbf6ef', bg2: '#fbf6ef', bgAngle: 0 },
+  'Sushiro Sky': { text: 'TAKE YOU TO\nJAPAN', font: 'Luckiest Guy', fontSize: 170, letterSpacing: 3, lineHeight: 1, jitter: 18, rotate: -4,
+    fillType: 'gradient', fill1: '#fff3a6', fill2: '#ffa51f', gradAngle: 90, gradScope: 'letter', gloss: 30,
+    s1w: 6, s1c: '#8e1b1b', s2w: 5, s2c: '#fff6e8', s3w: 0, s3c: '#8e1b1b', exDepth: 6, exAngle: 80, exColor: '#5a0f0f',
+    shX: 5, shY: 8, shBlur: 6, shColor: '#4a1010', shOpacity: 40, warp: 'wave', warpAmt: 35,
+    stitch: false, stitchColor: '#ffffff', stitchW: 2, decor: 'none', decorColor: '#e62e2e', decorColor2: '#ffffff', decorPad: 30,
+    sparkles: 18, sparkleColor: '#fff2b0', sparkleShape: 'mixed', sparkleSize: 100, bgType: 'gradient', bg1: '#ffb7c5', bg2: '#ffe3a8', bgAngle: 160 },
+  'Joyous Script': { text: 'Joyous\nSavings', font: 'Pacifico', fontSize: 180, letterSpacing: 0, lineHeight: 1.05, jitter: 0, rotate: -6,
+    fillType: 'solid', fill1: '#ffffff', fill2: '#ffffff', gradAngle: 90, gradScope: 'letter', gloss: 0,
+    s1w: 5, s1c: '#1f5a34', s2w: 0, s2c: '#ffffff', s3w: 0, s3c: '#ffffff', exDepth: 0, exAngle: 90, exColor: '#0e3a22',
+    shX: 4, shY: 8, shBlur: 8, shColor: '#05301a', shOpacity: 35, warp: 'none', warpAmt: 0,
+    stitch: false, stitchColor: '#ffffff', stitchW: 2, decor: 'none', decorColor: '#e62e2e', decorColor2: '#ffffff', decorPad: 30,
+    sparkles: 14, sparkleColor: '#ffd54a', sparkleShape: 'stars', sparkleSize: 100, bgType: 'dots', bg1: '#0f7a3e', bg2: '#1b8e4c', bgAngle: 0 },
+  'Starburst Deal': { text: 'SAVE\n40%', font: 'Bangers', fontSize: 210, letterSpacing: 6, lineHeight: 0.9, jitter: 0, rotate: -8,
+    fillType: 'gradient', fill1: '#fff27a', fill2: '#ffc21a', gradAngle: 90, gradScope: 'letter', gloss: 40,
+    s1w: 5, s1c: '#b3261e', s2w: 5, s2c: '#ffffff', s3w: 0, s3c: '#b3261e', exDepth: 8, exAngle: 90, exColor: '#7a1410',
+    shX: 4, shY: 8, shBlur: 6, shColor: '#000000', shOpacity: 35, warp: 'archUp', warpAmt: 25,
+    stitch: false, stitchColor: '#ffffff', stitchW: 2, decor: 'starburst', decorColor: '#e62e2e', decorColor2: '#ffffff', decorPad: 70,
+    sparkles: 8, sparkleColor: '#ffffff', sparkleShape: 'stars', sparkleSize: 100, bgType: 'transparent', bg1: '#ffffff', bg2: '#ffffff', bgAngle: 0 },
+  'Ribbon Promo': { text: '★ NATIONAL DAY PROMOTION ★', font: 'Lilita One', fontSize: 70, letterSpacing: 2, lineHeight: 1, jitter: 0, rotate: 0,
+    fillType: 'solid', fill1: '#ffffff', fill2: '#ffffff', gradAngle: 90, gradScope: 'letter', gloss: 0,
+    s1w: 0, s1c: '#ffffff', s2w: 0, s2c: '#ffffff', s3w: 0, s3c: '#ffffff', exDepth: 0, exAngle: 90, exColor: '#000000',
+    shX: 0, shY: 3, shBlur: 3, shColor: '#000000', shOpacity: 40, warp: 'archDown', warpAmt: 12,
+    stitch: false, stitchColor: '#ffffff', stitchW: 2, decor: 'ribbon', decorColor: '#c8102e', decorColor2: '#8b0000', decorPad: 28,
+    sparkles: 10, sparkleColor: '#ffd54a', sparkleShape: 'confetti', sparkleSize: 100, bgType: 'transparent', bg1: '#ffffff', bg2: '#ffffff', bgAngle: 0 },
+  'Price Tag': { text: 'ONLY\n$4.90', font: 'Playfair Display', fontSize: 150, letterSpacing: 0, lineHeight: 0.95, jitter: 0, rotate: -10,
+    fillType: 'solid', fill1: '#fff4dc', fill2: '#fff4dc', gradAngle: 90, gradScope: 'letter', gloss: 0,
+    s1w: 0, s1c: '#ffffff', s2w: 0, s2c: '#ffffff', s3w: 0, s3c: '#ffffff', exDepth: 0, exAngle: 90, exColor: '#000000',
+    shX: 2, shY: 4, shBlur: 4, shColor: '#5a1d00', shOpacity: 40, warp: 'none', warpAmt: 0,
+    stitch: false, stitchColor: '#ffffff', stitchW: 2, decor: 'circle', decorColor: '#e8642c', decorColor2: '#fff4dc', decorPad: 60,
+    sparkles: 0, sparkleColor: '#ffd54a', sparkleShape: 'stars', sparkleSize: 100, bgType: 'transparent', bg1: '#ffffff', bg2: '#ffffff', bgAngle: 0 },
+  'Stitched Pill': { text: '22-23 AUG', font: 'Baloo 2', fontSize: 110, letterSpacing: 4, lineHeight: 1, jitter: 0, rotate: 0,
+    fillType: 'solid', fill1: '#ffffff', fill2: '#ffffff', gradAngle: 90, gradScope: 'letter', gloss: 0,
+    s1w: 0, s1c: '#ffffff', s2w: 0, s2c: '#ffffff', s3w: 0, s3c: '#ffffff', exDepth: 0, exAngle: 90, exColor: '#000000',
+    shX: 0, shY: 0, shBlur: 0, shColor: '#000000', shOpacity: 0, warp: 'none', warpAmt: 0,
+    stitch: false, stitchColor: '#ffffff', stitchW: 2, decor: 'pill', decorColor: '#4f7f3a', decorColor2: '#ffffff', decorPad: 34,
+    sparkles: 6, sparkleColor: '#f3b6c4', sparkleShape: 'hearts', sparkleSize: 100, bgType: 'transparent', bg1: '#ffffff', bg2: '#ffffff', bgAngle: 0 },
+  'Classic 97': { text: 'WordArt', font: 'Impact', fontSize: 220, letterSpacing: 0, lineHeight: 1, jitter: 0, rotate: 0,
+    fillType: 'gradient', fill1: '#3aa0ff', fill2: '#0a2a8a', gradAngle: 90, gradScope: 'line', gloss: 0,
+    s1w: 2, s1c: '#000000', s2w: 0, s2c: '#ffffff', s3w: 0, s3c: '#ffffff', exDepth: 22, exAngle: 45, exColor: '#888888',
+    shX: 0, shY: 0, shBlur: 0, shColor: '#000000', shOpacity: 0, warp: 'archUp', warpAmt: 45,
+    stitch: false, stitchColor: '#ffffff', stitchW: 2, decor: 'none', decorColor: '#e62e2e', decorColor2: '#ffffff', decorPad: 30,
+    sparkles: 0, sparkleColor: '#ffd54a', sparkleShape: 'stars', sparkleSize: 100, bgType: 'solid', bg1: '#ffffff', bg2: '#ffffff', bgAngle: 0 },
+  'Chrome': { text: 'CHROME', font: 'Rubik Mono One', fontSize: 150, letterSpacing: 4, lineHeight: 1, jitter: 0, rotate: 0,
+    fillType: 'gradient', fill1: '#f4f6fa', fill2: '#6b7686', gradAngle: 90, gradScope: 'letter', gloss: 70,
+    s1w: 2, s1c: '#1c2330', s2w: 0, s2c: '#ffffff', s3w: 0, s3c: '#ffffff', exDepth: 10, exAngle: 90, exColor: '#2b3442',
+    shX: 0, shY: 14, shBlur: 14, shColor: '#000000', shOpacity: 45, warp: 'bulge', warpAmt: 30,
+    stitch: false, stitchColor: '#ffffff', stitchW: 2, decor: 'none', decorColor: '#e62e2e', decorColor2: '#ffffff', decorPad: 30,
+    sparkles: 10, sparkleColor: '#ffffff', sparkleShape: 'stars', sparkleSize: 90, bgType: 'gradient', bg1: '#1b2230', bg2: '#3b4a63', bgAngle: 90 },
+};
+
+/* ----------------------------- control schema ----------------------------- */
+const WARPS = [['none','None'],['archUp','Arch up'],['archDown','Arch down'],['wave','Wave'],['flag','Flag'],['bulge','Bulge'],['pinch','Pinch'],['rise','Rise'],['perspective','Perspective'],['skew','Slant']];
+const DECORS = [['none','None'],['ribbon','Ribbon banner'],['starburst','Starburst'],['pill','Stitched pill'],['box','Framed box'],['circle','Badge circle'],['splat','Splat']];
+const BGS = [['transparent','Transparent'],['solid','Solid'],['gradient','Gradient'],['radial','Radial glow'],['rays','Sun rays'],['dots','Polka dots'],['stripes','Stripes']];
+const SIZES = ['1200x800','1080x1080','1080x1350','1080x1920','1920x1080','1600x600','800x400'];
+
+const SCHEMA = [
+  { title: 'Text', open: true, controls: [
+    { k: 'text', type: 'textarea' },
+    { k: 'font', type: 'select', opts: FONTS.map(f => [f, f]), label: 'Font' },
+    { k: 'fontSize', type: 'range', min: 20, max: 500, step: 1, label: 'Size' },
+    { k: 'letterSpacing', type: 'range', min: -20, max: 60, step: 1, label: 'Letter spacing' },
+    { k: 'lineHeight', type: 'range', min: 0.6, max: 2, step: 0.05, label: 'Line height' },
+    { k: 'jitter', type: 'range', min: 0, max: 100, step: 1, label: 'Bounce' },
+    { k: 'rotate', type: 'range', min: -45, max: 45, step: 1, label: 'Rotate°' },
+  ]},
+  { title: 'Fill', open: true, controls: [
+    { k: 'fillType', type: 'select', opts: [['solid','Solid'],['gradient','Gradient']], label: 'Fill' },
+    { k: 'fill1', type: 'color', label: 'Color' },
+    { k: 'fill2', type: 'color', label: 'Color 2', show: s => s.fillType === 'gradient' },
+    { k: 'gradAngle', type: 'range', min: 0, max: 360, step: 5, label: 'Angle°', show: s => s.fillType === 'gradient' },
+    { k: 'gradScope', type: 'select', opts: [['letter','Per letter'],['line','Per line']], label: 'Scope', show: s => s.fillType === 'gradient' },
+    { k: 'gloss', type: 'range', min: 0, max: 100, step: 1, label: 'Gloss' },
+  ]},
+  { title: 'Outlines', open: true, controls: [
+    { k: 's1w', type: 'range', min: 0, max: 30, step: 1, label: 'Inner width' },
+    { k: 's1c', type: 'color', label: 'Inner color', show: s => s.s1w > 0 },
+    { k: 's2w', type: 'range', min: 0, max: 30, step: 1, label: 'Middle width' },
+    { k: 's2c', type: 'color', label: 'Middle color', show: s => s.s2w > 0 },
+    { k: 's3w', type: 'range', min: 0, max: 30, step: 1, label: 'Outer width' },
+    { k: 's3c', type: 'color', label: 'Outer color', show: s => s.s3w > 0 },
+    { k: 'stitch', type: 'checkbox', label: 'Stitch line' },
+    { k: 'stitchColor', type: 'color', label: 'Stitch color', show: s => s.stitch },
+    { k: 'stitchW', type: 'range', min: 1, max: 6, step: 1, label: 'Stitch width', show: s => s.stitch },
+  ]},
+  { title: '3D & Shadow', open: false, controls: [
+    { k: 'exDepth', type: 'range', min: 0, max: 60, step: 1, label: 'Extrude depth' },
+    { k: 'exAngle', type: 'range', min: 0, max: 360, step: 5, label: 'Extrude angle°', show: s => s.exDepth > 0 },
+    { k: 'exColor', type: 'color', label: 'Extrude color', show: s => s.exDepth > 0 },
+    { k: 'shOpacity', type: 'range', min: 0, max: 100, step: 1, label: 'Shadow opacity' },
+    { k: 'shX', type: 'range', min: -60, max: 60, step: 1, label: 'Shadow X', show: s => s.shOpacity > 0 },
+    { k: 'shY', type: 'range', min: -60, max: 60, step: 1, label: 'Shadow Y', show: s => s.shOpacity > 0 },
+    { k: 'shBlur', type: 'range', min: 0, max: 60, step: 1, label: 'Shadow blur', show: s => s.shOpacity > 0 },
+    { k: 'shColor', type: 'color', label: 'Shadow color', show: s => s.shOpacity > 0 },
+  ]},
+  { title: 'Warp', open: false, controls: [
+    { k: 'warp', type: 'select', opts: WARPS, label: 'Warp' },
+    { k: 'warpAmt', type: 'range', min: 0, max: 100, step: 1, label: 'Amount', show: s => s.warp !== 'none' },
+  ]},
+  { title: 'Decoration', open: false, controls: [
+    { k: 'decor', type: 'select', opts: DECORS, label: 'Shape' },
+    { k: 'decorColor', type: 'color', label: 'Shape color', show: s => s.decor !== 'none' },
+    { k: 'decorColor2', type: 'color', label: 'Accent color', show: s => s.decor !== 'none' },
+    { k: 'decorPad', type: 'range', min: 0, max: 200, step: 2, label: 'Padding', show: s => s.decor !== 'none' },
+    { k: 'sparkles', type: 'range', min: 0, max: 60, step: 1, label: 'Sparkles' },
+    { k: 'sparkleShape', type: 'select', opts: [['mixed','Mixed'],['stars','Stars'],['hearts','Hearts'],['confetti','Confetti'],['dots','Dots']], label: 'Sparkle type', show: s => s.sparkles > 0 },
+    { k: 'sparkleColor', type: 'color', label: 'Sparkle color', show: s => s.sparkles > 0 },
+    { k: 'sparkleSize', type: 'range', min: 30, max: 250, step: 5, label: 'Sparkle size', show: s => s.sparkles > 0 },
+    { k: 'seed', type: 'range', min: 1, max: 99, step: 1, label: 'Shuffle', show: s => s.sparkles > 0 || s.jitter > 0 },
+  ]},
+  { title: 'Background', open: false, controls: [
+    { k: 'bgType', type: 'select', opts: BGS, label: 'Background' },
+    { k: 'bg1', type: 'color', label: 'Color', show: s => s.bgType !== 'transparent' },
+    { k: 'bg2', type: 'color', label: 'Color 2', show: s => !['transparent','solid'].includes(s.bgType) },
+    { k: 'bgAngle', type: 'range', min: 0, max: 360, step: 5, label: 'Angle°', show: s => ['gradient','stripes'].includes(s.bgType) },
+    { k: 'size', type: 'select', opts: SIZES.map(x => [x, x.replace('x', ' × ')]), label: 'Canvas size' },
+  ]},
+];
+
+/* --------------------------------- state ---------------------------------- */
+let state = loadState();
+function loadState() {
+  try { const j = JSON.parse(localStorage.getItem('wordart-state')); if (j && typeof j === 'object') return { ...DEFAULTS, ...j }; } catch (e) {}
+  return { ...DEFAULTS };
+}
+function saveState() { try { localStorage.setItem('wordart-state', JSON.stringify(state)); } catch (e) {} }
+
+/* ------------------------------ build the UI ------------------------------ */
+const panel = document.getElementById('panel');
+const inputs = {};
+SCHEMA.forEach(sec => {
+  const d = document.createElement('details'); d.open = sec.open;
+  const sm = document.createElement('summary'); sm.textContent = sec.title; d.appendChild(sm);
+  const box = document.createElement('div'); box.className = 'sec';
+  sec.controls.forEach(c => {
+    const row = document.createElement('div'); row.className = 'row' + (c.type === 'textarea' ? ' wide' : '');
+    row.dataset.k = c.k; c.row = row;
+    let inp, val;
+    if (c.type === 'textarea') {
+      inp = document.createElement('textarea'); inp.spellcheck = false; inp.placeholder = 'Your text…';
+      row.appendChild(inp);
+    } else {
+      const lab = document.createElement('label'); lab.textContent = c.label || c.k; row.appendChild(lab);
+      if (c.type === 'select') {
+        inp = document.createElement('select');
+        c.opts.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; inp.appendChild(o); });
+      } else {
+        inp = document.createElement('input'); inp.type = c.type;
+        if (c.type === 'range') { inp.min = c.min; inp.max = c.max; inp.step = c.step; }
+      }
+      row.appendChild(inp);
+      if (c.type === 'range') { val = document.createElement('span'); val.className = 'val'; row.appendChild(val); }
+    }
+    inp.addEventListener('input', () => {
+      state[c.k] = c.type === 'checkbox' ? inp.checked : c.type === 'range' ? parseFloat(inp.value) : inp.value;
+      if (val) val.textContent = fmt(state[c.k]);
+      onChange();
+    });
+    inputs[c.k] = { inp, val, c };
+    box.appendChild(row);
+  });
+  d.appendChild(box); panel.appendChild(d);
+});
+function fmt(v) { return Number.isInteger(v) ? v : (+v).toFixed(2); }
+function syncUI() {
+  for (const k in inputs) {
+    const { inp, val, c } = inputs[k];
+    if (c.type === 'checkbox') inp.checked = !!state[k]; else inp.value = state[k];
+    if (val) val.textContent = fmt(state[k]);
+  }
+  updateVisibility();
+}
+function updateVisibility() {
+  for (const k in inputs) { const { c } = inputs[k]; c.row.classList.toggle('hidden', !!(c.show && !c.show(state))); }
+}
+let activePreset = null;
+const presetsEl = document.getElementById('presets');
+Object.keys(PRESETS).forEach(name => {
+  const b = document.createElement('button'); b.className = 'chip'; b.textContent = name;
+  b.addEventListener('click', () => applyPreset(name));
+  presetsEl.appendChild(b);
+});
+function applyPreset(name) {
+  const p = PRESETS[name];
+  const keepSize = state.size;
+  state = { ...DEFAULTS, ...p, size: keepSize };
+  activePreset = name;
+  [...presetsEl.children].forEach(b => b.classList.toggle('active', b.textContent === name));
+  syncUI(); onChange();
+}
+function onChange() {
+  updateVisibility(); saveState(); scheduleRender();
+  if (activePreset) { [...presetsEl.children].forEach(b => b.classList.remove('active')); }
+}
+
+/* ------------------------------- rendering -------------------------------- */
+const cvs = document.getElementById('c');
+const ctx = cvs.getContext('2d');
+let layerA = document.createElement('canvas'), layerB = document.createElement('canvas'), glyphCanvas = document.createElement('canvas');
+let raf = 0;
+function scheduleRender() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; render(); }); }
+
+function fontString(s) { return `${FONT_WEIGHTS[s.font] || 400} ${s.fontSize}px "${s.font}"`; }
+function setupText(c, s) {
+  c.font = fontString(s); c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.lineJoin = 'round'; c.lineCap = 'round'; c.miterLimit = 2;
+}
+// seeded PRNG
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hashStr(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+function layoutText(c, s) {
+  c.font = fontString(s);
+  const lines = s.text.replace(/\r/g, '').split('\n');
+  const lh = s.fontSize * s.lineHeight;
+  const totalH = lh * lines.length;
+  const a = s.warpAmt / 100;
+  const rnd = mulberry32(hashStr(s.text) + s.seed * 7919);
+  const H = s.fontSize;
+  const out = [];
+  let bb = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
+  lines.forEach((line, li) => {
+    const y0 = -totalH / 2 + lh * (li + 0.5);
+    const chars = [...line];
+    const widths = chars.map(ch => c.measureText(ch).width);
+    const W0 = widths.reduce((p, w) => p + w, 0) + s.letterSpacing * Math.max(0, chars.length - 1);
+    // scale factor along the line for rise/perspective
+    const sf = u => s.warp === 'rise' ? 1 + a * 1.2 * (u + 0.5) : 1;
+    // first pass: compute centers with scaled advances
+    let x = 0; const cs = [];
+    chars.forEach((ch, i) => {
+      const u0 = W0 ? ((x + widths[i] / 2) / W0 - 0.5) : 0;
+      const f = sf(u0);
+      const cx = x + widths[i] * f / 2;
+      cs.push({ ch, w: widths[i], cx, f });
+      x += widths[i] * f + s.letterSpacing * f;
+    });
+    const W = Math.max(1, x - (chars.length ? s.letterSpacing * cs[cs.length - 1].f : 0));
+    const items = cs.map(o => {
+      const cx = o.cx - W / 2;
+      const u = cx / W;            // -0.5..0.5
+      let t = { x: cx, y: y0, rot: 0, sx: o.f, sy: o.f, kx: 0, w: o.w * o.f, ch: o.ch };
+      switch (s.warp) {
+        case 'archUp': case 'archDown': {
+          if (a > 0.001) {
+            const th = a * Math.PI * 1.1; const R = W / th; const ang = u * th;
+            const dir = s.warp === 'archUp' ? 1 : -1;
+            t.x = R * Math.sin(ang); t.y = y0 + dir * R * (1 - Math.cos(ang)); t.rot = dir * ang;
+          }
+          break;
+        }
+        case 'wave': { const amp = a * H * 0.45; t.y = y0 + amp * Math.sin(u * Math.PI * 2); t.rot = Math.atan2(amp * Math.cos(u * Math.PI * 2) * Math.PI * 2, W) * 0.7; break; }
+        case 'flag': { const amp = a * H * 0.35; t.y = y0 + amp * Math.sin(u * Math.PI * 2 + li); t.sy = 1 + 0.35 * a * Math.sin(u * Math.PI * 2 + li + 1.2); break; }
+        case 'bulge': t.sy = 1 + a * 0.9 * (1 - 4 * u * u); t.y = y0; break;
+        case 'pinch': t.sy = 1 - a * 0.6 * (1 - 4 * u * u); break;
+        case 'perspective': t.sy = 1 + a * 1.2 * (u + 0.5); t.y = y0; break;
+        case 'skew': t.kx = -a * 0.9; break;
+        case 'rise': t.y = y0 - (o.f - 1) * H * 0.15; break;
+      }
+      if (s.jitter > 0) {
+        const j = s.jitter / 100;
+        t.rot += (rnd() - 0.5) * j * 0.5;
+        t.y += (rnd() - 0.5) * j * H * 0.35;
+        const sc = 1 + (rnd() - 0.5) * j * 0.25; t.sx *= sc; t.sy *= sc;
+      }
+      const hw = t.w / 2 + 2, hh = H * 0.42 * t.sy;
+      bb.x0 = Math.min(bb.x0, t.x - hw); bb.x1 = Math.max(bb.x1, t.x + hw);
+      bb.y0 = Math.min(bb.y0, t.y - hh); bb.y1 = Math.max(bb.y1, t.y + hh);
+      return t;
+    });
+    // per-line bbox
+    const lb = items.reduce((b, t) => ({ x0: Math.min(b.x0, t.x - t.w / 2), x1: Math.max(b.x1, t.x + t.w / 2), y0: Math.min(b.y0, t.y - H * 0.42 * t.sy), y1: Math.max(b.y1, t.y + H * 0.42 * t.sy) }), { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity });
+    out.push({ items, bbox: lb });
+  });
+  if (!isFinite(bb.x0)) bb = { x0: -10, y0: -10, x1: 10, y1: 10 };
+  bb.w = bb.x1 - bb.x0; bb.h = bb.y1 - bb.y0;
+  return { lines: out, bbox: bb };
+}
+function applyT(c, t, CX, CY, s, ox = 0, oy = 0) {
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.translate(CX + ox, CY + oy); c.rotate(s.rotate * Math.PI / 180);
+  c.translate(t.x, t.y); c.rotate(t.rot); c.transform(1, 0, t.kx, 1, 0, 0); c.scale(t.sx, t.sy);
+}
+function forEachChar(lay, fn) { lay.lines.forEach(l => l.items.forEach(t => { if (t.ch.trim()) fn(t.ch, t); })); }
+function hexToRgba(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; }
+function shade(hex, k) { const n = parseInt(hex.slice(1), 16); const f = v => Math.max(0, Math.min(255, Math.round(v * k))); return `rgb(${f(n >> 16 & 255)},${f(n >> 8 & 255)},${f(n & 255)})`; }
+function lineGrad(c, cx, cy, w, h, angDeg, c1, c2) {
+  const a = angDeg * Math.PI / 180, dx = Math.cos(a), dy = Math.sin(a);
+  const L = Math.abs(w * dx) + Math.abs(h * dy);
+  const g = c.createLinearGradient(cx - dx * L / 2, cy - dy * L / 2, cx + dx * L / 2, cy + dy * L / 2);
+  g.addColorStop(0, c1); g.addColorStop(1, c2); return g;
+}
+
+function render() {
+  const s = state;
+  const [W, H] = s.size.split('x').map(Number);
+  if (cvs.width !== W || cvs.height !== H) { cvs.width = W; cvs.height = H; }
+  if (layerA.width !== W || layerA.height !== H) { layerA.width = layerB.width = W; layerA.height = layerB.height = H; }
+  document.getElementById('sizeLabel').textContent = `${W} × ${H}px`;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
+  drawBackground(ctx, s, W, H);
+  setupText(ctx, s);
+  const lay = layoutText(ctx, s);
+  const CX = W / 2, CY = H / 2;
+  const total = s.s1w + s.s2w + s.s3w;
+
+  drawDecor(ctx, s, lay.bbox, CX, CY);
+  drawSparkles(ctx, s, lay.bbox, CX, CY);
+
+  // ---- shadow
+  if (s.shOpacity > 0 && (s.shX || s.shY || s.shBlur)) {
+    const lc = layerA.getContext('2d'); lc.setTransform(1, 0, 0, 1, 0, 0); lc.clearRect(0, 0, W, H); setupText(lc, s);
+    lc.fillStyle = lc.strokeStyle = s.shColor; lc.lineWidth = 2 * total;
+    const exx = s.exDepth * Math.cos(s.exAngle * Math.PI / 180), exy = s.exDepth * Math.sin(s.exAngle * Math.PI / 180);
+    forEachChar(lay, (ch, t) => { applyT(lc, t, CX, CY, s, exx, exy); if (total) lc.strokeText(ch, 0, 0); lc.fillText(ch, 0, 0); });
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = s.shOpacity / 100;
+    if (s.shBlur) ctx.filter = `blur(${s.shBlur}px)`;
+    ctx.drawImage(layerA, s.shX, s.shY); ctx.restore();
+  }
+  // ---- extrude
+  if (s.exDepth > 0) {
+    const dx = Math.cos(s.exAngle * Math.PI / 180), dy = Math.sin(s.exAngle * Math.PI / 180);
+    ctx.fillStyle = ctx.strokeStyle = s.exColor; ctx.lineWidth = 2 * total;
+    for (let i = s.exDepth; i >= 1; i--) {
+      forEachChar(lay, (ch, t) => { applyT(ctx, t, CX, CY, s, dx * i, dy * i); if (total) ctx.strokeText(ch, 0, 0); ctx.fillText(ch, 0, 0); });
+    }
+  }
+  // ---- outlines, outer first
+  const strokes = [[s.s1w + s.s2w + s.s3w, s.s3c, s.s3w], [s.s1w + s.s2w, s.s2c, s.s2w], [s.s1w, s.s1c, s.s1w]];
+  strokes.forEach(([cum, col, own]) => {
+    if (own <= 0) return;
+    ctx.strokeStyle = col; ctx.lineWidth = 2 * cum;
+    forEachChar(lay, (ch, t) => { applyT(ctx, t, CX, CY, s); ctx.strokeText(ch, 0, 0); });
+  });
+  // ---- fill: each glyph gets fill + gradient + gloss composited in its own offscreen canvas,
+  //      then stamped with the glyph transform (so nothing bleeds onto neighbours)
+  {
+    const q = s.fontSize < 260 ? 2 : 1, h2 = s.fontSize * 0.5;
+    const g = glyphCanvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    let lineIdx = 0;
+    lay.lines.forEach(l => l.items.forEach(t => {
+      if (!t.ch.trim()) return;
+      const gw = t.w / t.sx + s.fontSize * 1.0, gh = s.fontSize * 1.9;
+      const cw = Math.ceil(gw * q), chh = Math.ceil(gh * q);
+      if (glyphCanvas.width < cw) glyphCanvas.width = cw;
+      if (glyphCanvas.height < chh) glyphCanvas.height = chh;
+      g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cw, chh);
+      g.setTransform(q, 0, 0, q, cw / 2, chh / 2);
+      setupText(g, s); g.fillStyle = s.fill1; g.fillText(t.ch, 0, 0);
+      g.globalCompositeOperation = 'source-atop';
+      if (s.fillType === 'gradient') {
+        if (s.gradScope === 'letter') g.fillStyle = lineGrad(g, 0, 0, gw * 0.8, h2 * 1.7, s.gradAngle, s.fill1, s.fill2);
+        else { const b = l.bbox; g.fillStyle = lineGrad(g, ((b.x0 + b.x1) / 2 - t.x) / t.sx, ((b.y0 + b.y1) / 2 - t.y) / t.sy, (b.x1 - b.x0) / t.sx, (b.y1 - b.y0) / t.sy, s.gradAngle, s.fill1, s.fill2); }
+        g.fillRect(-gw / 2, -gh / 2, gw, gh);
+      }
+      if (s.gloss > 0) {
+        const k = s.gloss / 100;
+        let gr = g.createLinearGradient(0, -h2 * 0.9, 0, -h2 * 0.02);
+        gr.addColorStop(0, `rgba(255,255,255,${0.75 * k})`); gr.addColorStop(0.8, `rgba(255,255,255,${0.35 * k})`); gr.addColorStop(1, `rgba(255,255,255,${0.25 * k})`);
+        g.fillStyle = gr; g.fillRect(-gw / 2, -gh / 2, gw, gh / 2 - h2 * 0.02);
+        gr = g.createLinearGradient(0, h2 * 0.1, 0, h2 * 0.8);
+        gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, `rgba(0,0,0,${0.22 * k})`);
+        g.fillStyle = gr; g.fillRect(-gw / 2, 0, gw, gh / 2);
+      }
+      g.globalCompositeOperation = 'source-over';
+      applyT(ctx, t, CX, CY, s);
+      ctx.drawImage(glyphCanvas, 0, 0, cw, chh, -gw / 2, -gh / 2, gw, gh);
+    }));
+  }
+  // ---- stitch
+  if (s.stitch) {
+    ctx.strokeStyle = s.stitchColor; ctx.lineWidth = s.stitchW * 1.6; ctx.lineCap = 'round';
+    const d = Math.max(3, s.fontSize * 0.045);
+    ctx.setLineDash([d, d * 0.9]);
+    forEachChar(lay, (ch, t) => { applyT(ctx, t, CX, CY, s); ctx.strokeText(ch, 0, 0); });
+    ctx.setLineDash([]);
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+/* ------------------------------- background ------------------------------- */
+function drawBackground(c, s, W, H) {
+  if (s.bgType === 'transparent') return;
+  c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+  if (s.bgType === 'solid') { c.fillStyle = s.bg1; c.fillRect(0, 0, W, H); }
+  else if (s.bgType === 'gradient') { c.fillStyle = lineGrad(c, W / 2, H / 2, W, H, s.bgAngle, s.bg1, s.bg2); c.fillRect(0, 0, W, H); }
+  else if (s.bgType === 'radial') { const g = c.createRadialGradient(W / 2, H / 2, 10, W / 2, H / 2, Math.hypot(W, H) / 2); g.addColorStop(0, s.bg1); g.addColorStop(1, s.bg2); c.fillStyle = g; c.fillRect(0, 0, W, H); }
+  else if (s.bgType === 'rays') {
+    c.fillStyle = s.bg1; c.fillRect(0, 0, W, H); c.fillStyle = s.bg2;
+    const n = 24, R = Math.hypot(W, H); c.translate(W / 2, H / 2);
+    for (let i = 0; i < n; i += 2) { const a0 = i / n * Math.PI * 2, a1 = (i + 1) / n * Math.PI * 2; c.beginPath(); c.moveTo(0, 0); c.arc(0, 0, R, a0, a1); c.closePath(); c.fill(); }
+  }
+  else if (s.bgType === 'dots') {
+    c.fillStyle = s.bg1; c.fillRect(0, 0, W, H); c.fillStyle = s.bg2; const g = 44;
+    for (let y = 0; y < H + g; y += g) for (let x = ((y / g) % 2) * g / 2; x < W + g; x += g) { c.beginPath(); c.arc(x, y, 6, 0, Math.PI * 2); c.fill(); }
+  }
+  else if (s.bgType === 'stripes') {
+    c.fillStyle = s.bg1; c.fillRect(0, 0, W, H); c.fillStyle = s.bg2;
+    c.translate(W / 2, H / 2); c.rotate(s.bgAngle * Math.PI / 180); const R = Math.hypot(W, H), sw = 36;
+    for (let x = -R; x < R; x += sw * 2) c.fillRect(x, -R, sw, 2 * R);
+  }
+  c.restore();
+}
+
+/* ------------------------------- decorations ------------------------------ */
+function roundRect(c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function drawDecor(c, s, bb, CX, CY) {
+  if (s.decor === 'none') return;
+  c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.translate(CX, CY); c.rotate(s.rotate * Math.PI / 180);
+  const p = s.decorPad, x = bb.x0 - p, y = bb.y0 - p, w = bb.w + 2 * p, h = bb.h + 2 * p;
+  const col = s.decorColor, acc = s.decorColor2;
+  c.lineJoin = 'round';
+  switch (s.decor) {
+    case 'ribbon': {
+      const tail = h * 0.9, drop = h * 0.22, notch = tail * 0.45;
+      // tails
+      c.fillStyle = acc;
+      c.beginPath(); c.moveTo(x + tail * 0.4, y + drop); c.lineTo(x - tail * 0.5, y + drop); c.lineTo(x - tail * 0.5 + notch, y + drop + h / 2); c.lineTo(x - tail * 0.5, y + drop + h); c.lineTo(x + tail * 0.4, y + drop + h); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(x + w - tail * 0.4, y + drop); c.lineTo(x + w + tail * 0.5, y + drop); c.lineTo(x + w + tail * 0.5 - notch, y + drop + h / 2); c.lineTo(x + w + tail * 0.5, y + drop + h); c.lineTo(x + w - tail * 0.4, y + drop + h); c.closePath(); c.fill();
+      // folds
+      c.fillStyle = shade(acc, 0.6);
+      c.beginPath(); c.moveTo(x, y + h); c.lineTo(x + tail * 0.4, y + h); c.lineTo(x, y + h + drop); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(x + w, y + h); c.lineTo(x + w - tail * 0.4, y + h); c.lineTo(x + w, y + h + drop); c.closePath(); c.fill();
+      // band with slight curve
+      c.fillStyle = col; c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + w / 2, y - h * 0.12, x + w, y); c.lineTo(x + w, y + h); c.quadraticCurveTo(x + w / 2, y + h - h * 0.12, x, y + h); c.closePath(); c.fill();
+      // glossy edge lines
+      c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 3; c.beginPath(); c.moveTo(x + 10, y + 8); c.quadraticCurveTo(x + w / 2, y - h * 0.12 + 8, x + w - 10, y + 8); c.stroke();
+      break;
+    }
+    case 'starburst': {
+      const n = 28, cx = x + w / 2, cy = y + h / 2, R = Math.max(w, h * 1.15) / 2 + 10, r = R * 0.86;
+      c.fillStyle = acc; star(c, cx, cy, R + 10, r + 10, n, 0.06); c.fill();
+      c.fillStyle = col; star(c, cx, cy, R, r, n, 0); c.fill();
+      c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = 3; star(c, cx, cy, R - 16, r - 16, n, 0); c.stroke();
+      break;
+    }
+    case 'pill': {
+      const r = h / 2; c.fillStyle = acc; roundRect(c, x - 8, y - 8, w + 16, h + 16, r + 8); c.fill();
+      c.fillStyle = col; roundRect(c, x, y, w, h, r); c.fill();
+      c.strokeStyle = acc; c.lineWidth = 3; c.setLineDash([12, 9]); roundRect(c, x + 12, y + 12, w - 24, h - 24, r - 12); c.stroke(); c.setLineDash([]);
+      break;
+    }
+    case 'box': {
+      c.fillStyle = col; roundRect(c, x, y, w, h, 24); c.fill();
+      c.strokeStyle = acc; c.lineWidth = 8; roundRect(c, x, y, w, h, 24); c.stroke();
+      c.lineWidth = 3; roundRect(c, x + 14, y + 14, w - 28, h - 28, 14); c.stroke();
+      break;
+    }
+    case 'circle': {
+      const cx = x + w / 2, cy = y + h / 2, rx = w / 2 + 6, ry = Math.max(h / 2 + 6, rx * 0.8);
+      c.fillStyle = acc; c.beginPath(); c.ellipse(cx, cy, rx + 10, ry + 10, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = col; c.beginPath(); c.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = 'rgba(255,255,255,.45)'; c.lineWidth = 3; c.beginPath(); c.ellipse(cx, cy, rx - 12, ry - 12, 0, 0, Math.PI * 2); c.stroke();
+      break;
+    }
+    case 'splat': {
+      const rnd = mulberry32(s.seed * 31 + 5), cx = x + w / 2, cy = y + h / 2, n = 18;
+      const blob = (ex) => { c.beginPath(); for (let i = 0; i <= n; i++) { const a = i / n * Math.PI * 2; const k = 1 + (rnd() - 0.5) * 0.35; const px = cx + Math.cos(a) * (w / 2 + ex) * k, py = cy + Math.sin(a) * (h / 2 + ex) * k; i ? c.lineTo(px, py) : c.moveTo(px, py); } c.closePath(); };
+      c.fillStyle = acc; blob(18); c.fill(); c.fillStyle = col; blob(4); c.fill();
+      break;
+    }
+  }
+  c.restore();
+}
+function star(c, cx, cy, R, r, n, rot) {
+  c.beginPath();
+  for (let i = 0; i < n * 2; i++) { const a = rot + i / (n * 2) * Math.PI * 2 - Math.PI / 2, rad = i % 2 ? r : R; const px = cx + Math.cos(a) * rad, py = cy + Math.sin(a) * rad; i ? c.lineTo(px, py) : c.moveTo(px, py); }
+  c.closePath();
+}
+function sparkle4(c, x, y, r, rot) {
+  c.save(); c.translate(x, y); c.rotate(rot); c.beginPath(); const k = r * 0.18;
+  c.moveTo(0, -r); c.quadraticCurveTo(k, -k, r, 0); c.quadraticCurveTo(k, k, 0, r); c.quadraticCurveTo(-k, k, -r, 0); c.quadraticCurveTo(-k, -k, 0, -r); c.closePath(); c.fill(); c.restore();
+}
+function heart(c, x, y, r, rot) {
+  c.save(); c.translate(x, y); c.rotate(rot); c.scale(r / 10, r / 10); c.beginPath();
+  c.moveTo(0, 4); c.bezierCurveTo(-10, -4, -5, -12, 0, -6); c.bezierCurveTo(5, -12, 10, -4, 0, 4); c.closePath(); c.fill(); c.restore();
+}
+function drawSparkles(c, s, bb, CX, CY) {
+  if (s.sparkles <= 0) return;
+  const rnd = mulberry32(s.seed * 101 + hashStr(s.text));
+  c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.translate(CX, CY); c.rotate(s.rotate * Math.PI / 180);
+  const pad = s.decorPad + 20, ex = bb.w * 0.22 + 60, ey = bb.h * 0.35 + 60;
+  const base = s.sparkleSize / 100 * Math.max(10, s.fontSize * 0.12);
+  let placed = 0, tries = 0;
+  while (placed < s.sparkles && tries < s.sparkles * 30) {
+    tries++;
+    const px = bb.x0 - pad - ex + rnd() * (bb.w + 2 * (pad + ex));
+    const py = bb.y0 - pad - ey + rnd() * (bb.h + 2 * (pad + ey));
+    // keep out of the text core (rough)
+    if (px > bb.x0 - pad * 0.2 && px < bb.x1 + pad * 0.2 && py > bb.y0 - pad * 0.2 && py < bb.y1 + pad * 0.2) continue;
+    const r = base * (0.4 + rnd() * 1.1), rot = rnd() * Math.PI, shape = s.sparkleShape;
+    c.fillStyle = s.sparkleColor; c.globalAlpha = 0.75 + rnd() * 0.25;
+    const pick = shape === 'mixed' ? ['stars', 'stars', 'dots', 'hearts'][Math.floor(rnd() * 4)] : shape;
+    if (pick === 'stars') sparkle4(c, px, py, r, rot * 0.3);
+    else if (pick === 'hearts') heart(c, px, py, r, (rnd() - 0.5) * 0.8);
+    else if (pick === 'dots') { c.beginPath(); c.arc(px, py, r * 0.3, 0, Math.PI * 2); c.fill(); }
+    else if (pick === 'confetti') { c.save(); c.translate(px, py); c.rotate(rot); c.fillRect(-r * 0.35, -r * 0.15, r * 0.7, r * 0.3); c.restore(); }
+    placed++;
+  }
+  c.restore();
+}
+
+/* --------------------------------- export --------------------------------- */
+function exportCanvas() {
+  const crop = document.getElementById('cropExport').checked;
+  if (!crop) return cvs;
+  const W = cvs.width, H = cvs.height; const d = ctx.getImageData(0, 0, W, H).data;
+  let x0 = W, y0 = H, x1 = -1, y1 = -1;
+  if (state.bgType === 'transparent') {
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { if (d[(y * W + x) * 4 + 3] > 8) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } }
+  } else {
+    const r0 = d[0], g0 = d[1], b0 = d[2];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4; if (Math.abs(d[i] - r0) + Math.abs(d[i + 1] - g0) + Math.abs(d[i + 2] - b0) > 30) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } }
+  }
+  if (x1 < 0) return cvs;
+  const pad = 24; x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(W - 1, x1 + pad); y1 = Math.min(H - 1, y1 + pad);
+  const o = document.createElement('canvas'); o.width = x1 - x0 + 1; o.height = y1 - y0 + 1;
+  o.getContext('2d').drawImage(cvs, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
+  return o;
+}
+async function saveBlob(blob, filename) {
+  // Inside a Claude artifact, downloads go through the viewer's save prompt; elsewhere use a plain download link.
+  const inArtifact = !!(window.claude && typeof window.claude.use === 'function');
+  if (inArtifact) {
+    const dl = await window.claude.use('downloads').catch(() => null);
+    if (!dl) return 'unavailable';
+    try { await dl.save({ filename, data: blob }); return 'saved'; }
+    catch (e) { return e && e.code === 'declined' ? 'declined' : 'unavailable'; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000); return 'saved';
+}
+document.getElementById('btnExport').addEventListener('click', async () => {
+  const btn = document.getElementById('btnExport'), label = '⬇ Export PNG';
+  const blob = await new Promise(r => exportCanvas().toBlob(r, 'image/png'));
+  const name = `wordart-${state.text.replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 30) || 'art'}.png`;
+  const res = await saveBlob(blob, name);
+  btn.textContent = res === 'saved' ? '✅ Saved' : res === 'declined' ? label : '⚠ Saving not available here — use Copy';
+  setTimeout(() => btn.textContent = label, res === 'unavailable' ? 3000 : 1200);
+});
+document.getElementById('btnCopy').addEventListener('click', async () => {
+  const btn = document.getElementById('btnCopy');
+  try {
+    const blob = await new Promise(r => exportCanvas().toBlob(r, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    btn.textContent = '✅ Copied'; setTimeout(() => btn.textContent = '📋 Copy', 1200);
+  } catch (e) { btn.textContent = '❌ Not allowed'; setTimeout(() => btn.textContent = '📋 Copy', 1500); }
+});
+document.getElementById('cropExport').addEventListener('change', () => {});
+
+/* -------------------------------- randomize ------------------------------- */
+const PALETTES = [
+  ['#ffe86b', '#ff9a2e', '#8b1a1a', '#ffffff', '#5a0f0f', '#ffb7c5', '#ffe3a8'],
+  ['#9cc979', '#4f8a3c', '#3d6b2f', '#fffaf0', '#2f5228', '#fbf4e6', '#efe3c9'],
+  ['#ff5a5a', '#9b0000', '#ffd98a', '#6e0000', '#5c0000', '#ffffff', '#fff0f0'],
+  ['#7fd3ff', '#1d5fd1', '#0a2a6a', '#ffffff', '#071a45', '#e9f4ff', '#bfe0ff'],
+  ['#ffb3d9', '#e8409a', '#8c1d5c', '#ffffff', '#5a0f3a', '#fff0f7', '#ffd6ea'],
+  ['#fff27a', '#ffc21a', '#b3261e', '#ffffff', '#7a1410', '#e62e2e', '#ffd6cf'],
+  ['#f4f6fa', '#6b7686', '#1c2330', '#ffffff', '#2b3442', '#1b2230', '#3b4a63'],
+  ['#c7ff8a', '#36b04a', '#0f5a2a', '#fff7e0', '#083d1c', '#0f7a3e', '#1b8e4c'],
+  ['#ffd7a8', '#e8642c', '#7a2a0a', '#fff4dc', '#4a1a05', '#fbf6ef', '#f2d9c2'],
+];
+document.getElementById('btnRandom').addEventListener('click', () => {
+  const r = Math.random, pick = a => a[Math.floor(r() * a.length)], rng = (a, b) => Math.round(a + r() * (b - a));
+  const p = pick(PALETTES);
+  Object.assign(state, {
+    font: pick(FONTS.filter(f => !['Inter'].includes(f))),
+    fillType: r() < 0.75 ? 'gradient' : 'solid', fill1: p[0], fill2: p[1], gradAngle: 90, gradScope: 'letter', gloss: rng(0, 80),
+    s1w: rng(0, 8), s1c: p[2], s2w: r() < 0.7 ? rng(3, 10) : 0, s2c: p[3], s3w: r() < 0.3 ? rng(2, 6) : 0, s3c: p[2],
+    exDepth: r() < 0.6 ? rng(3, 18) : 0, exAngle: pick([90, 90, 100, 80, 45, 135]), exColor: p[4],
+    shX: rng(-8, 12), shY: rng(2, 16), shBlur: rng(0, 16), shColor: '#000000', shOpacity: rng(15, 50),
+    warp: pick(WARPS.map(w => w[0])), warpAmt: rng(10, 60), jitter: r() < 0.35 ? rng(8, 35) : 0, rotate: rng(-8, 8),
+    stitch: r() < 0.25, stitchColor: p[3],
+    decor: r() < 0.4 ? pick(DECORS.map(d => d[0]).filter(d => d !== 'none')) : 'none', decorColor: p[1], decorColor2: p[3], decorPad: rng(20, 60),
+    sparkles: rng(0, 20), sparkleColor: pick([p[0], p[3], '#ffd54a']), sparkleShape: pick(['mixed', 'stars', 'hearts', 'confetti']),
+    bgType: pick(['solid', 'gradient', 'radial', 'rays', 'dots', 'transparent']), bg1: p[5], bg2: p[6], bgAngle: rng(0, 360),
+    seed: rng(1, 99),
+  });
+  syncUI(); onChange();
+});
+
+/* --------------------------------- init ----------------------------------- */
+syncUI(); render();
+// re-render as web fonts arrive
+const fontLoads = FONTS.map(f => document.fonts.load(`${FONT_WEIGHTS[f] || 400} 40px "${f}"`).catch(() => {}));
+Promise.allSettled(fontLoads).then(() => render());
+document.fonts.addEventListener?.('loadingdone', () => scheduleRender());
+
+</script>

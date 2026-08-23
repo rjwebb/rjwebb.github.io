@@ -9,6 +9,11 @@ body {
   background-color: white;
 }
 
+/*I'm using this as a subheading*/
+hgroup p {
+    font-style: italic;
+}
+
 .bg-mask {
   position: fixed;
   inset: 0;
