@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Task packets, an actually useful AI coding pattern | rjwebb.github.io</title>
+  <link rel="stylesheet" type="text/css" href="../style/style.css" />
+</head>
+
+<body>
+  <a href="../index.html">Back</a>
+  <h1>Task packets, an actually useful AI coding pattern</h1>
+  <em>written 23rd November 2026</em>
+
+  <p>This concept is shamelessly stolen from <a
+  href="https://web.navan.dev/posts/2026-05-06-how-to-build-your-own-software-factory.html#create-the-task-packet">How
+  To Build Your Own Software Factory</a> by Navan Chauhan, which is a
+  fantastic and very long and dense article. He works for <a
+  href="https://delinea.com/strongdm">StrongDM</a>, a company that
+  provides a kind of authenticated and audited proxy that grants personnel
+  and agents to secure IT infrastructure (doesn’t this sound a bit like <a
+  href="./2026-11-23.html">bobnet</a>?). I found out about this company
+  from Commoncog, who held a Q&amp;A in June 2026 with Navan Chauhan and
+  Jay Taylor of StrongDM. I wasn’t there, but I listened to the recording
+  (<a href="https://commoncog.com/software-dark-factory-q-a/">here</a>,
+  but it’s paywalled - you should subscribe to Commoncog). Simon
+  Willison’s <a
+  href="https://simonwillison.net/2026/Feb/7/software-factory/">post</a>
+  from January gives some more context.</p>
+  <h2 id="what-is-a-task-packet">What is a task packet?</h2>
+  <p>In short, a task packet is a souped-up issue template. Instead of
+  just giving a description of the problem, proposed solution and
+  alternatives considered, a task packet has the following sections:</p>
+  <ul>
+  <li>What happens: a brief description of the current behaviour of the
+  thing to be changed, which could be a bug (that does something other
+  than what the user expects), or a user need that is not being met</li>
+  <li>Why: a description of the current relevant part of the code which is
+  responsible for the buggy behaviour, or doesn’t currently support the
+  feature</li>
+  <li>Suggested fix: a detailed description of what needs to change to fix
+  the bug/implement the feature</li>
+  <li>Scope: a complete list of all the files that need to change</li>
+  <li>Non-goals: things that should not be done in the course of executing
+  this task packet</li>
+  <li>Reproduction: what to do to reproduce the issue - i.e. a new test,
+  which should fail at first and then pass after the change has been
+  made</li>
+  <li>Validation: criteria that must be satisfied for the task to be
+  considered done, which includes any tests that should pass, but also
+  non-code things like specification changes</li>
+  <li>No-op rules: if any of these criteria are satisfied, don’t proceed
+  with the task and alert the developer</li>
+  <li>Found by: the issue number and a note about how it was
+  discovered</li>
+  </ul>
+  <p>The above fields can be generated with Claude - a good way to do this
+  is to write an issue by hand, then feed it to Claude (I have a command
+  <code>pnpm packet draft &lt;issue number&gt;</code> for this), which
+  attempts to fill in all of the fields with the information you have
+  given, and its own reading of the codebase. If anything is unclear,
+  contradictory or underdetermined, the agent can ask you questions which
+  it uses to fill in the gaps. Once the task packet has been written,
+  review it by <em>reading it yourself</em>. Sorry! This isn’t a totally
+  hands-off process, yet.</p>
+  <p>Once you are happy with the task packet, you can run
+  <code>pnpm factory &lt;issue number&gt;</code> which opens the task
+  packet, splits it up by each section and does a few things:</p>
+  <ul>
+  <li>Calls Claude Code in headless mode with a prompt constructed from
+  all of the fields in the packet (excluding Found by) and the
+  read/edit/write/glob/grep/todowrite and a number of pnpm and git
+  commands as tools.</li>
+  <li>Checks that only files listed in “Scope” have been edited.</li>
+  <li>Runs the commands listed in “Validation” - this happens outside of a
+  sandboxed environment, so it’s up to the developer to check these when
+  reading the task packet to confirm that they are safe.</li>
+  </ul>
+  <p>It doesn’t currently implement the “No-op rules”, beyond including
+  them in the Claude Code prompt (i.e. there is no check blocking
+  them).</p>
+  <p>The factory returns one of (4) output states:</p>
+  <ul>
+  <li>NO_OP: if the issue can’t be worked on, e.g. if the issue is closed
+  or it’s blocked by another issue that isn’t closed</li>
+  <li>ESCALATE: the task may or may not be done, but it needs a developer
+  to check the result</li>
+  <li>RETRYABLE_FAILURE: the task failed for a reason unrelated to the
+  issue itself, e.g. a clash with the name of another branch</li>
+  <li>PR_READY: the task was executed successfully</li>
+  </ul>
+  <p>The reasoning behind having these terminal states is that the models
+  in coding agents are trained to produce output - so if it can’t do
+  something, it will try to hallucinate in order to have produced output.
+  So you need to give models a way to give up on a task.</p>
+  <h2 id="does-this-work">Does this work?</h2>
+  <p>It seems to? I found that in the past, if I gave an agent an
+  open-ended task it would save me from thinking upfront in exchange for
+  much more thinking down the line (when the agent had implemented
+  something I didn’t understand and it failed for a reason I didn’t
+  understand). This is a bad habit, and in a good engineering team with
+  human beings holding each other to account, this wouldn’t happen. So
+  it’s important that a coding environment with a single person directing
+  many LLMs follows the same principle. Doing the thinking up front
+  (i.e. writing the task packet) and then getting the AI to implement it
+  feels like the right way round to me. I know, that’s not an actual
+  answer - I’m still just theorising as to why this is a good idea,
+  without giving hard data or even a good empirical anecdote as a
+  response.</p>
+</body>
+
+</html>
