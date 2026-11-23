@@ -14,11 +14,13 @@
 // converted to a .html file next to it (existing hand-written .html
 // posts without a .md source are never touched), and new posts are
 // linked from the Thoughts list in index.html, sorted newest-first.
+// Each page also gets social-sharing metadata (see site_meta.js).
 // Requires pandoc.
 
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
+const { injectMeta } = require("./site_meta");
 
 const THOUGHTS_DIR = path.join(__dirname, "thoughts");
 const INDEX = path.join(__dirname, "index.html");
@@ -71,7 +73,8 @@ function template(title, date, body) {
 <html>
 
 <head>
-  <title>${title} | rjwebb.github.io</title>
+  <meta charset="utf-8" />
+  <title>${title} | bobwebb.org</title>
   <link rel="stylesheet" type="text/css" href="../style/style.css" />
 </head>
 
@@ -102,10 +105,8 @@ function convert(mdPath) {
     .join("\n");
 
   const outPath = mdPath.replace(/\.md$/, ".html");
-  fs.writeFileSync(
-    outPath,
-    template(escapeHtml(title), formatDate(date), bodyHtml)
-  );
+  const html = template(escapeHtml(title), formatDate(date), bodyHtml);
+  fs.writeFileSync(outPath, injectMeta(html, path.relative(__dirname, outPath)));
   return { outPath, title };
 }
 
