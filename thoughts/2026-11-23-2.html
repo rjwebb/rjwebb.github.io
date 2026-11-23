@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>How I currently think about the future of programming, vis-à-vis AI | rjwebb.github.io</title>
+  <link rel="stylesheet" type="text/css" href="../style/style.css" />
+</head>
+
+<body>
+  <a href="../index.html">Back</a>
+  <h1>How I currently think about the future of programming, vis-à-vis AI</h1>
+  <em>written 23rd November 2026</em>
+
+  <p>According to Collins English Dictionary, <a
+  href="https://en.wikipedia.org/wiki/Vibe_coding">vibe coding</a> was the
+  phrase of the year, which is to say, everyone has noticed at this point
+  that, <a
+  href="https://a16z.com/why-software-is-eating-the-world/">having already
+  eaten the rest of the world</a>, software (ok, artificial intelligence)
+  has now eaten code itself. Does that mean that nobody will ever write
+  code anymore? I don’t know, but I do know that the parts of software
+  engineering that aren’t coding (i.e. requirements analysis, design,
+  testing, program analysis) will take up a larger and larger slice of
+  engineers’ time. Investing effort in these things is a good bet either
+  way, because even in the event of some kind of Butlerian Jihad (the
+  crusade against artifical intelligence that happens in the Dune stories)
+  where we all go back to writing code by hand, those skills will be
+  useful anyway. For the sake of this article, I want to make “writing
+  code using AI” my focus, because it’s the exciting new thing.</p>
+  <h2 id="context-is-everything">Context is everything</h2>
+  <p>There are some people who insist on pure vibe coding (i.e. never
+  looking at the code, or maybe not even looking at AI generated specs or
+  tests) but I think this only works for small projects. As a general
+  rule, if you give a large language model a large input, it’ll do worse
+  than if you give it a small input. Getting value out of LLMs then
+  becomes a question of feeding it just the right input needed for it to
+  accomplish its task, i.e. “context engineering”. Two ways of doing this
+  are RAG and agentic search.</p>
+  <h3 id="rag">RAG</h3>
+  <p>A year ago it was popular to do context engineering using “old
+  fashioned” RAG (retrieval augmented generation), where you would use
+  some kind of information retrieval method (e.g. embedding search, or
+  tagging entries with labels, or full-text search, or feeding the input
+  to a cheaper LLM first) to retrieve the relevant data before feeding it
+  to an LLM. A drawback with this approach is that you have to choose an
+  information retrieval that is well-suited to the data under
+  consideration and the kind of search you are trying to do. For example,
+  embeddings are well-suited to looking for things with similar topics,
+  but they aren’t good at evaluating logical statements or matching on
+  literal substrings.</p>
+  <p>I used a kind of “RAG with LLMs” method for <a
+  href="https://incarnate.bobnet.nl/">incarnate</a>: when the user clicks
+  “Generate avatar”, the app uses a relatively cheap model (Qwen3 30B A3B)
+  to select tweets from their archive (it looked at 12 batches of 500, so
+  max 6000 tweets) that would be most appropriate for generating an avatar
+  (retrieval), then feeds the selected tweets to a model that generates a
+  prompt, which is then fed to the image gen model to generate the avatar
+  itself (augmented generation). This particular approach to RAG was
+  well-suited to my app, but I can imagine others, e.g. using a decision
+  model to select tweets, or clustering tweets by topic to find the most
+  significant themes. I could also imagine users choosing to generate an
+  avatar that reflects their personality traits, or their specific
+  interests. There isn’t just one notion of “relevance” that can be
+  applied to every task.</p>
+  <h3 id="agency">Agency</h3>
+  <p>More recently, “agentic search” has become the buzzword for context
+  engineering. This means instead of explicitly designing the algorithm
+  for retrieving data, you let the large language model return a message
+  or a “tool call”, which is an instruction to run some code and give it
+  the result. Tool calls could include things like SQL database queries,
+  embedding searches, or simply opening text files and searching for words
+  with <code>grep</code>. The thing that makes this “agentic” is that the
+  model decides what calls will be made and how their results will be
+  combined to reach the final result. This is a a fascinating and
+  unprecedented inversion of software engineering - instead of specifying
+  how things should be done, the software engineer now defines tools and
+  environments in which agents operate sort-of autonomously. These tools
+  and environments can be conducive to the agent’s success, or frustrate
+  it.</p>
+  <h2 id="so-what-now">So what now?</h2>
+  <p>I think this means there are at least two fruitful directions that
+  people involved with the production of software (I’m wary of saying
+  “software engineer” from now on, because it implies an attachment to an
+  ossified nature of one’s job description) can go in now: dedicating more
+  energy to non-coding software engineering, and building environments and
+  tools for agents. There isn’t any inherent conflict here. Tacit
+  knowledge of software engineering, combined with an understanding of the
+  strengths and weaknesses of AI can be combined to build better software,
+  for less.</p>
+</body>
+
+</html>
