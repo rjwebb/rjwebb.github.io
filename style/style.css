@@ -12,6 +12,12 @@ body {
 /*I'm using this as a subheading*/
 hgroup p {
     font-style: italic;
+    margin-top: 0.5em;
+    margin-bottom: 0.6em;
+}
+
+hgroup h2 {
+    margin-bottom: 0.5em;
 }
 
 .bg-mask {
