@@ -8,6 +8,9 @@
 // and inserts them right after </title>, wrapped in marker comments so
 // re-running replaces the block instead of duplicating it.
 //
+// The block also carries the GoatCounter analytics script (cookieless,
+// no consent banner needed), so every page is counted.
+//
 // Used by build_thoughts.js for generated posts and by add_meta.js for
 // every other page.
 
@@ -18,6 +21,8 @@ const SITE_NAME = "bobwebb.org";
 const DEFAULT_DESCRIPTION = "Bob Webb's personal website.";
 const START = "<!-- social meta -->";
 const END = "<!-- /social meta -->";
+const ANALYTICS =
+  '<script data-goatcounter="https://rjwebb.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>';
 const MAX_DESCRIPTION = 200;
 const MIN_PARAGRAPH = 40; // shorter <p>s (addresses, link labels) make poor descriptions
 
@@ -166,6 +171,7 @@ function metaBlock({ title, description, image, url, type, hasDescription }, ind
     START,
     `<link rel="canonical" href="${escapeAttr(url)}" />`,
     ...tags.map(([attr, key, value]) => `<meta ${attr}="${key}" content="${escapeAttr(value)}" />`),
+    ANALYTICS,
     END,
   ]
     .map((line) => indent + line)
