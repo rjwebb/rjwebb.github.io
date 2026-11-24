@@ -72,6 +72,12 @@ hgroup p {
 
 .thoughts-day {
   margin-top: 0.4em;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+.thoughts-day.new-month {
+  margin-top: 1em;
 }
 
 .thoughts-posts {

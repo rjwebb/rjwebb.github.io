@@ -177,10 +177,10 @@ function collectPosts(indexHtml, mdMeta) {
   );
 }
 
-// "2026-11-23" -> "November 23rd"
-function formatDay(isoDate) {
+// "2026-11-23" -> "23rd November", or just "23rd" without the month
+function formatDay(isoDate, withMonth) {
   const [, month, day] = isoDate.split("-").map(Number);
-  return `${MONTHS[month - 1]} ${ordinal(day)}`;
+  return withMonth ? `${ordinal(day)} ${MONTHS[month - 1]}` : ordinal(day);
 }
 
 function renderList(posts, indent) {
@@ -195,9 +195,14 @@ function renderList(posts, indent) {
       lines.push(`<h3 class="thoughts-year">${year}</h3>`);
     }
     if (post.date !== day) {
+      // the month is only written for the first day listed in it
+      // and a new month gets extra space above it, unless it's the first
+      // one under the year heading
+      const sameMonth = day !== null && day.slice(0, 7) === post.date.slice(0, 7);
+      const cls = day !== null && !sameMonth ? "thoughts-day new-month" : "thoughts-day";
       if (day !== null) lines.push("</ul>");
       day = post.date;
-      lines.push(`<div class="thoughts-day">${formatDay(day)}</div>`);
+      lines.push(`<div class="${cls}">${formatDay(day, !sameMonth)}</div>`);
       lines.push('<ul class="thoughts-posts">');
     }
     const sub = post.subtitleHtml
